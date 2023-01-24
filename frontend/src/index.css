@@ -3,3 +3,15 @@
   margin: 0;
   box-sizing: border-box;
 }
+
+/*html, body, #root, #root > div {*/
+/*  min-height: 100%;*/
+/*}*/
+
+html, body {
+  background-image: url("assets/background.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+}

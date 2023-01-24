@@ -1,0 +1,61 @@
+.user-profile {
+    width: min(90%, 700px);
+    margin: 5rem auto;
+    padding: 1%;
+}
+.user-profile-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.avatar-username {
+    width: min(100%, 500px);
+    display: grid;
+    column-gap: 0.5rem;
+    row-gap: 2rem;
+    place-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.info-field {
+    width: 100%;
+    align-items: center;
+    display: grid;
+    column-gap: 0.5rem;
+    row-gap: 1rem;
+    margin: 2rem 0;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field-name {
+    text-align: right;
+    margin-right: 2rem;
+}
+
+.profile-input-field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-count-bar {
+    display: flex;
+    justify-content: space-between;
+}
+
+.user-count-bar > * {
+    margin-right: 4px;
+}
+
+@media only screen and (max-width: 551px) {
+    .field-name {
+        text-align: center;
+        margin-right: 0;
+    }
+    .field-value {
+        text-align: center;
+    }
+    .username-user-page {
+        text-align: center;
+    }
+}
