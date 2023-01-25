@@ -23,13 +23,17 @@
     display: grid;
     column-gap: 0.5rem;
     row-gap: 1rem;
-    margin: 2rem 0;
+    margin: 1rem 0;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .field-name {
     text-align: right;
     margin-right: 2rem;
+}
+
+.field-value-viewing {
+    margin-left: 2rem;
 }
 
 .profile-input-field {
@@ -47,6 +51,55 @@
     margin-right: 4px;
 }
 
+.modal-body-container {
+    min-height: 20vh;
+}
+
+.user-card {
+    min-height: 95px;
+}
+
+.user-card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    align-items: center;
+}
+
+.modal-cancel-btn-wrapper {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.follow-btn-wrapper {
+    width: 100%;
+
+}
+
+@media only screen and (max-width: 461px) {
+    .modal-cancel-btn-wrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .user-card {
+        min-height: 125px;
+    }
+    .modal-user-info-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+@media only screen and (max-width: 442px) {
+
+    .user-card {
+        min-height: 135px;
+    }
+
+}
+
+
 @media only screen and (max-width: 551px) {
     .field-name {
         text-align: center;
@@ -54,6 +107,10 @@
     }
     .field-value {
         text-align: center;
+
+    }
+    .field-value-viewing {
+        margin-left: 0;
     }
     .username-user-page {
         text-align: center;

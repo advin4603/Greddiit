@@ -35,6 +35,20 @@ function Protected({children}) {
   return children
 }
 
+function OnlyUnauthorized({children}) {
+  const {jwt} = useContext(JWTContext);
+
+  if (jwt !== null)
+    return <Navigate to="/profile" replace/>
+
+  return children
+}
+
+function Profile() {
+  const {username} = useContext(JWTContext);
+  return <Navigate to={`/u/${username}`} replace/>
+}
+
 const router = createBrowserRouter(createRoutesFromElements(
   <>
     <Route path="*" element={<NotFound/>}/>
@@ -42,10 +56,11 @@ const router = createBrowserRouter(createRoutesFromElements(
            errorElement={<Error/>}>
       <Route errorElement={<Error/>}>
         <Route path="u/:username" id="user" element={<Protected><User/></Protected>} loader={userLoader}/>
+        <Route path="profile" element={<Protected><Profile /></Protected>} />
       </Route>
 
     </Route>
-    <Route path="/auth" element={<Auth/>}></Route></>
+    <Route path="/auth" element={<OnlyUnauthorized><Auth/></OnlyUnauthorized>}></Route></>
 ))
 
 
