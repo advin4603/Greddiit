@@ -3,7 +3,7 @@ import './auth.css'
 import {useContext, useState, useRef, useEffect} from "react";
 import useValidationForm from "../../hooks/validationForm.js";
 import logoName from '../../assets/logoName.svg'
-import {useNavigate} from "react-router-dom";
+import {createSearchParams, useLoaderData, useNavigate} from "react-router-dom";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {
   ageValidator, confirmPasswordValidator,
@@ -13,6 +13,14 @@ import {
   usernameValidator
 } from "../../util/validation.js";
 
+export function loader({request}) {
+  const url = new URL(request.url);
+  const mode = url.searchParams.get("mode");
+  if (mode === "signup")
+    return {createNew: true}
+
+  return {createNew: false}
+}
 
 function SignIn({setJWT, navigate}) {
   const {data, setAllValidate, validate, bindings, setData} = useValidationForm({username: "", password: ""})
@@ -162,9 +170,10 @@ function SignUp({setJWT, navigate}) {
 
 
 export default function Auth() {
-  const [createNew, setCreateNew] = useState(false);
+  const {createNew} = useLoaderData();
   const navigate = useNavigate();
   const {setJWT} = useContext(JWTContext);
+
 
   return (<div className="auth-form">
     <Card>
@@ -186,7 +195,7 @@ export default function Auth() {
           color="primary"
           auto
           onPress={() => {
-            setCreateNew(!createNew)
+            navigate({pathname: "/auth", search: `?${createSearchParams([['mode', createNew ? 'signin' : 'signup']])}`})
           }}
         >
           {createNew ? "Already have an account? Sign In!" : "Don't have an account? Sign Up!"}

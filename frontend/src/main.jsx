@@ -12,7 +12,7 @@ import {JWTContext} from "./contexts/jwtContext.js";
 import './index.css'
 import Root from "./routes/root/root.jsx";
 import Error from "./routes/error/error.jsx";
-import Auth from "./routes/auth/auth.jsx";
+import Auth, {loader as authLoader} from "./routes/auth/auth.jsx";
 import User, {loader as userLoader} from "./routes/user/user.jsx";
 import NotFound from "./routes/notFound/notFound.jsx";
 import jwtDecode from "jwt-decode";
@@ -60,7 +60,7 @@ const router = createBrowserRouter(createRoutesFromElements(
       </Route>
 
     </Route>
-    <Route path="/auth" element={<OnlyUnauthorized><Auth/></OnlyUnauthorized>}></Route></>
+    <Route loader={authLoader} path="/auth" element={<OnlyUnauthorized><Auth/></OnlyUnauthorized>}></Route></>
 ))
 
 
