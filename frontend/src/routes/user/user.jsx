@@ -1,5 +1,6 @@
-import {useLoaderData, useRevalidator} from "react-router-dom";
 import './user.css'
+
+import {useLoaderData, useRevalidator} from "react-router-dom";
 import {
   Card,
   Avatar,
@@ -27,6 +28,8 @@ import {
 import EditIcon from "../../icons/editIcon.jsx";
 import CancelIcon from "../../icons/cancelIcon.jsx";
 import {Link} from "react-router-dom";
+
+
 
 export async function loader({params}) {
   let admin = {
@@ -89,15 +92,15 @@ function EditableField({fieldName, value, bindings, setValue, inputData, submitC
   const {error, helperText} = validator(inputData)
 
   return (
-    <div className="info-field">
-      <Text h3 className="field-name">
+    <div id="info-field">
+      <Text h3 id="field-name">
         {fieldName}
       </Text>
-      <div className="profile-input-field">
+      <div id="profile-input-field">
         <Input css={{maxWidth: 200}} helperText={validate ? helperText : ""}
                helperColor={validate ? (error ? "error" : "success") : "default"}
                color={validate ? (error ? "error" : "success") : "default"} aria-label={fieldName} underlined
-               className="field-value" {...bindings} />
+               id="field-value" {...bindings} />
         {submitting ?
           <Loading css={{marginLeft: 10}}/>
           :
@@ -137,11 +140,11 @@ function EditableField({fieldName, value, bindings, setValue, inputData, submitC
 
 function Field({fieldName, value}) {
   return (
-    <div className="info-field">
-      <Text h3 className="field-name">
+    <div id="info-field">
+      <Text h3 id="field-name">
         {fieldName}
       </Text>
-      <Text h3 className="field-value field-value-viewing">
+      <Text h3 id="field-value-viewing">
         {value}
       </Text>
     </div>
@@ -226,12 +229,12 @@ function UserListModal({title, bindings, users, cancel = false}) {
           {title}
         </Text>
       </Modal.Header>
-      <Modal.Body className="modal-body-container">
+      <Modal.Body id="modal-body-container">
         {users.map((user) => (
 
-          <Card key={user.username} className="user-card" variant="bordered">
-            <Card.Body className="user-card-body">
-              <div className="modal-user-info-wrapper">
+          <Card key={user.username} id="user-card" variant="bordered">
+            <Card.Body id="user-card-body">
+              <div id="modal-user-info-wrapper">
                 <UserInfo
                   size="lg"
                   src={user.profileLink}
@@ -249,7 +252,7 @@ function UserListModal({title, bindings, users, cancel = false}) {
               </div>
 
               {cancel ?
-                <div className="modal-cancel-btn-wrapper">
+                <div id="modal-cancel-btn-wrapper">
                   <Button
                     auto
                     icon={<CancelIcon size={20} fill="currentColor"/>}
@@ -303,15 +306,15 @@ function UserProfile({user}) {
                  bindings={followerBindings}/>
   <UserListModal cancel={isUser} users={user.following} title={`Users Following u/${user.username}`}
                  bindings={followingBindings}/>
-  <Card className="user-profile">
-    <Card.Header className="user-profile-header">
-      <div className="avatar-username">
+  <Card id="user-profile">
+    <Card.Header id="user-profile-header">
+      <div id="avatar-username">
         <Avatar zoomed pointer bordered color="gradient" src={user.profileLink} css={{width: 200, height: 200}}/>
         <div>
-          <Text h1 className="username-user-page" css={{
+          <Text h1 id="username-user-page" css={{
             textGradient: "90deg, $secondary 0%, $primary 100%",
           }}>{`u/${user.username}`}</Text>
-          <div className="user-count-bar">
+          <div id="user-count-bar">
             <StyledButton users={user.followers} onClick={() => {
               setFollowersVisible(true)
             }}>
@@ -332,7 +335,7 @@ function UserProfile({user}) {
     </Card.Header>
     <Card.Body>
       {!isUser ?
-      <Button color="success" auto css={{width: "50%", margin: "auto", marginBottom: "1rem"}} disabled={followed} auto>
+      <Button color="success" auto css={{width: "50%", margin: "auto", marginBottom: "1rem"}} disabled={followed}>
         {followed?
           "Following": "Follow"}
       </Button>

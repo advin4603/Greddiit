@@ -1,14 +1,14 @@
-.user-profile {
+#user-profile {
     width: min(90%, 700px);
     margin: 5rem auto;
     padding: 1%;
 }
-.user-profile-header {
+#user-profile-header {
     width: 100%;
     display: flex;
     justify-content: center;
 }
-.avatar-username {
+#avatar-username {
     width: min(100%, 500px);
     display: grid;
     column-gap: 0.5rem;
@@ -17,7 +17,7 @@
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.info-field {
+#info-field {
     width: 100%;
     align-items: center;
     display: grid;
@@ -27,65 +27,65 @@
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.field-name {
+#field-name {
     text-align: right;
     margin-right: 2rem;
 }
 
-.field-value-viewing {
+#field-value-viewing {
     margin-left: 2rem;
 }
 
-.profile-input-field {
+#profile-input-field {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.user-count-bar {
+#user-count-bar {
     display: flex;
     justify-content: space-between;
 }
 
-.user-count-bar > * {
+#user-count-bar > * {
     margin-right: 4px;
 }
 
-.modal-body-container {
+#modal-body-container {
     min-height: 20vh;
 }
 
-.user-card {
+#user-card {
     min-height: 95px;
 }
 
-.user-card-body {
+#user-card-body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     align-items: center;
 }
 
-.modal-cancel-btn-wrapper {
+#modal-cancel-btn-wrapper {
     display: flex;
     flex-direction: row-reverse;
 }
 
-.follow-btn-wrapper {
+#follow-btn-wrapper {
     width: 100%;
 
 }
 
 @media only screen and (max-width: 461px) {
-    .modal-cancel-btn-wrapper {
+    #modal-cancel-btn-wrapper {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
     }
-    .user-card {
+    #user-card {
         min-height: 125px;
     }
-    .modal-user-info-wrapper {
+    #modal-user-info-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -93,7 +93,7 @@
 }
 @media only screen and (max-width: 442px) {
 
-    .user-card {
+    #user-card {
         min-height: 135px;
     }
 
@@ -101,18 +101,18 @@
 
 
 @media only screen and (max-width: 551px) {
-    .field-name {
+    #field-name {
         text-align: center;
         margin-right: 0;
     }
-    .field-value {
+    #field-value {
         text-align: center;
-
     }
-    .field-value-viewing {
+    #field-value-viewing {
         margin-left: 0;
+        text-align: center;
     }
-    .username-user-page {
+    #username-user-page {
         text-align: center;
     }
 }

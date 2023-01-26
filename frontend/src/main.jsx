@@ -1,3 +1,5 @@
+import './index.css'
+
 import React, {createContext, useContext, useEffect, useState} from 'react'
 import ReactDOM from 'react-dom/client'
 
@@ -9,13 +11,15 @@ import {Route, RouterProvider, Navigate, createBrowserRouter, createRoutesFromEl
 
 import {JWTContext} from "./contexts/jwtContext.js";
 
-import './index.css'
+
 import Root from "./routes/root/root.jsx";
 import Error from "./routes/error/error.jsx";
 import Auth, {loader as authLoader} from "./routes/auth/auth.jsx";
 import User, {loader as userLoader} from "./routes/user/user.jsx";
 import NotFound from "./routes/notFound/notFound.jsx";
 import jwtDecode from "jwt-decode";
+
+
 
 const lightTheme = createTheme({
   type: 'light',

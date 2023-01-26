@@ -1,5 +1,6 @@
-import {Text, Spacer} from "@nextui-org/react";
 import '../error/error.css';
+import {Text, Spacer} from "@nextui-org/react";
+
 
 export default function NotFound() {
 

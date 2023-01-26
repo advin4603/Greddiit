@@ -1,7 +1,6 @@
 import {Navbar, Text, Button, Dropdown, Avatar} from "@nextui-org/react";
 import {Outlet} from "react-router-dom";
 import {useNavigate} from "react-router-dom";
-import jwtDecode from "jwt-decode";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {useContext} from "react";
 

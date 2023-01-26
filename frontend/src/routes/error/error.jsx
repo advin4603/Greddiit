@@ -1,6 +1,8 @@
+import './error.css';
+
 import {useRouteError} from "react-router-dom";
 import {Text, Spacer} from "@nextui-org/react";
-import './error.css';
+
 
 export default function Error() {
   const error = useRouteError();

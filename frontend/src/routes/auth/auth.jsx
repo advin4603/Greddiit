@@ -1,5 +1,7 @@
-import {Card, Text, Input, Spacer, Button} from "@nextui-org/react";
 import './auth.css'
+
+import {Card, Text, Input, Spacer, Button} from "@nextui-org/react";
+
 import {useContext, useState, useRef, useEffect} from "react";
 import useValidationForm from "../../hooks/validationForm.js";
 import logoName from '../../assets/logoName.svg'
@@ -12,6 +14,8 @@ import {
   firstNameValidator, lastNameValidator, passwordValidator, requiredValidator,
   usernameValidator
 } from "../../util/validation.js";
+
+
 
 export function loader({request}) {
   const url = new URL(request.url);
@@ -74,7 +78,7 @@ function SignUp({setJWT, navigate}) {
   const getStatus = (val, err) => val ? (err ? "error" : "success") : "default"
 
   return (<>
-    <div className="field-row">
+    <div id="field-row">
       <Input
         bordered
         labelPlaceholder={"First Name"}
@@ -111,7 +115,7 @@ function SignUp({setJWT, navigate}) {
       {...bindings.email}
     />
     <Spacer y={3}/>
-    <div className="field-row">
+    <div id="field-row">
       <Input
         bordered
         type="Number"
@@ -175,21 +179,21 @@ export default function Auth() {
   const {setJWT} = useContext(JWTContext);
 
 
-  return (<div className="auth-form">
+  return (<div id="auth-form">
     <Card>
-      <Card.Header className="auth-header">
-        <div className="auth-logo-wrapper">
-          <img className="auth-logo" src={logoName} alt="logo"/>
+      <Card.Header id="auth-header">
+        <div id="auth-logo-wrapper">
+          <img id="auth-logo" src={logoName} alt="logo"/>
         </div>
       </Card.Header>
-      <Card.Body className="auth-body">
+      <Card.Body id="auth-body">
         <Text h2>{createNew ? "Sign Up" : "Sign In"}</Text>
         <Spacer y={2}/>
         {createNew ? <SignUp navigate={navigate} setJWT={setJWT}/> : <SignIn navigate={navigate} setJWT={setJWT}/>}
         <Spacer/>
       </Card.Body>
       <Card.Divider/>
-      <Card.Footer className="auth-footer">
+      <Card.Footer id="auth-footer">
         <Button
           light
           color="primary"
