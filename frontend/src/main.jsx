@@ -10,7 +10,7 @@ import {IconContext} from "phosphor-react";
 import {Route, RouterProvider, Navigate, createBrowserRouter, createRoutesFromElements} from "react-router-dom";
 
 import {JWTContext} from "./contexts/jwtContext.js";
-
+import {setAuthToken, deleteAuthToken, isAuthTokenSet} from "./backend/backend.js";
 
 import Root from "./routes/root/root.jsx";
 import Error from "./routes/error/error.jsx";
@@ -48,9 +48,25 @@ function OnlyUnauthorized({children}) {
   return children
 }
 
+function preLoader() {
+  if (!isAuthTokenSet()) {
+    const jwt = JSON.parse(localStorage.getItem("jwt"))
+    if (jwt === null)
+      return
+    setAuthToken(jwt)
+  }
+}
+
 function Profile() {
   const {username} = useContext(JWTContext);
   return <Navigate to={`/u/${username}`} replace/>
+}
+
+function loaderMaker(loader) {
+  return async (args) => {
+    preLoader()
+    return loader(args)
+  }
 }
 
 const router = createBrowserRouter(createRoutesFromElements(
@@ -59,7 +75,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Protected><Root/></Protected>}
            errorElement={<Error/>}>
       <Route errorElement={<Error/>}>
-        <Route path="u/:username" id="user" element={<Protected><User/></Protected>} loader={userLoader}/>
+        <Route path="u/:username" id="user" element={<Protected><User/></Protected>} loader={loaderMaker(userLoader)}/>
         <Route path="profile" element={<Protected><Profile /></Protected>} />
       </Route>
 
@@ -74,6 +90,10 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("jwt", JSON.stringify(jwt))
+    if (jwt === null)
+      deleteAuthToken()
+    else
+      setAuthToken(jwt)
   }, [jwt])
   const username = jwt === null ? null : jwtDecode(jwt).username;
 

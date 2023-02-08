@@ -13,7 +13,7 @@ import {
   useModal,
   Modal,
   User as UserInfo,
-  Link as LinkDisplay
+  Link as LinkDisplay, Spacer
 } from "@nextui-org/react";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {useContext, useEffect, useState} from "react";
@@ -28,65 +28,38 @@ import {
 import EditIcon from "../../icons/editIcon.jsx";
 import CancelIcon from "../../icons/cancelIcon.jsx";
 import {Link} from "react-router-dom";
-
-
+import backend from "../../backend/backend.js";
 
 export async function loader({params}) {
-  let admin = {
-    username: "admin",
-    firstName: "Ayan",
-    lastName: "Datta",
-    email: "advin4603@gmail.com",
-    age: "20",
-    contactNumber: "7036841181",
-    profileLink: "https://static.wikia.nocookie.net/undertale/images/5/50/Mettaton_battle_box.gif"
+
+  try {
+    const response = await backend.get(`users/${params.username}`)
+    if (response.status === 200)
+      return response.data
+  } catch (e) {
+    throw new Response("", {
+      status: 404,
+      statusText: "User Not Found"
+    })
   }
 
-  let dummy = {
-    username: "dummy",
-    firstName: "Dummy",
-    lastName: "Dummy",
-    email: "dummy@gmail.com",
-    age: "25",
-    contactNumber: "8036841181",
-    profileLink: "https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif",
-    followers: [admin],
-    following: [admin]
-  }
-
-  let test = {
-    username: "test",
-    firstName: "Test",
-    lastName: "Ing",
-    email: "test@gmail.com",
-    age: "27",
-    contactNumber: "8036841181",
-    profileLink: "https://static.wikia.nocookie.net/undertale/images/0/05/Flowey_battle_talk.gif",
-    followers: [admin],
-    following: [admin]
-  }
-
-  admin.followers = [dummy, test]
-  admin.following = [dummy, test]
-  if (params.username === "admin")
-    return admin
-
-  if (params.username === "dummy")
-    return dummy
-
-  if (params.username === "test")
-    return test
-
-
-  throw new Response("", {
-    status: 404,
-    statusText: "User Not Found"
-  })
 
 }
 
 
-function EditableField({fieldName, value, bindings, setValue, inputData, submitCallback, validator, validate}) {
+function EditableField({
+                         username,
+                         fieldName,
+                         value,
+                         bindings,
+                         setValue,
+                         inputData,
+                         submitCallback,
+                         validator,
+                         validate,
+                         fieldSubmitName,
+                         setError
+                       }) {
   const [submitting, setSubmitting] = useState(false);
 
   const {error, helperText} = validator(inputData)
@@ -108,14 +81,26 @@ function EditableField({fieldName, value, bindings, setValue, inputData, submitC
             <Button
               css={{marginLeft: 10, width: 30, height: 30}}
               disabled={error}
-              onPress={() => {
+              onPress={async () => {
                 setSubmitting(true)
-                setTimeout(() => {
-                  // TODO make request to change data
-                  // submit inputData
-                  submitCallback()
-                  setSubmitting(false)
-                }, 1000)
+                let submitData = {}
+                submitData[fieldSubmitName] = inputData
+                try {
+                  const response = await backend.patch(`users/${username}`, submitData)
+                  if (response.status === 200) {
+                    submitCallback?.()
+                    setSubmitting(false)
+                  }
+                } catch (e) {
+                  if ((e.response?.status === 400 || e.response?.status === 403) && e.response?.data.errors) {
+                    setError(e.response.data.errors[0])
+                    setSubmitting(false)
+                  } else {
+                    setError("Something went wrong")
+                    setSubmitting(false)
+                  }
+
+                }
               }}
               auto
               color="success"
@@ -164,42 +149,68 @@ function Fields({user, isUser}) {
   });
 
   const DataField = isUser ? EditableField : Field;
+  const [error, setError] = useState("")
 
   return (<>
+      {error ?
+        <>
+          <Badge style={{margin: "auto"}} enableShadow disableOutline color="error">
+            {error}
+          </Badge>
+          <Spacer y={3}/>
+        </>
+        :
+        null
+      }
       <DataField
         fieldName="First Name" value={user.firstName} inputData={data.firstName} setValue={setData.firstName}
         bindings={bindings.firstName}
+        fieldSubmitName="firstName"
         submitCallback={revalidator.revalidate}
         validator={firstNameValidator}
         validate={validate.firstName}
+        username={user.username}
+        setError={setError}
       />
       <DataField
         fieldName="Last Name" value={user.lastName} inputData={data.lastName} setValue={setData.lastName}
         bindings={bindings.lastName}
+        fieldSubmitName="lastName"
         submitCallback={revalidator.revalidate}
         validator={lastNameValidator}
         validate={validate.lastName}
+        username={user.username}
+        setError={setError}
       />
       <DataField
         fieldName="Email" value={user.email} inputData={data.email} setValue={setData.email}
         bindings={bindings.email}
+        fieldSubmitName="email"
         submitCallback={revalidator.revalidate}
         validator={emailValidator}
         validate={validate.email}
+        username={user.username}
+        setError={setError}
       />
       <DataField
         fieldName="Age" value={user.age} inputData={data.age} setValue={setData.age}
         bindings={{...bindings.age, type: "number"}}
+        fieldSubmitName="age"
         submitCallback={revalidator.revalidate}
         validator={ageValidator}
         validate={validate.age}
+        username={user.username}
+        setError={setError}
       />
       <DataField
         fieldName="Contact Number" inputData={data.contactNumber} value={user.contactNumber}
         setValue={setData.contactNumber} bindings={bindings.contactNumber}
         submitCallback={revalidator.revalidate}
+        fieldSubmitName="contactNumber"
         validator={contactNumberValidator}
         validate={validate.contactNumber}
+        username={user.username}
+        setError={setError}
       /></>
   );
 }
@@ -213,7 +224,28 @@ const StyledButton = styled("button", {
   }
 });
 
-function UserListModal({title, bindings, users, cancel = false}) {
+function UserRemoveButton({username, followerUsername, userIsFollower, revalidate}) {
+  const [removing, setRemoving] = useState(false)
+
+  return (<div id="modal-cancel-btn-wrapper">
+    <Button
+      disabled={removing}
+      auto
+      icon={<CancelIcon size={20} fill="currentColor"/>}
+      color="error"
+      onPress={() => {
+        setRemoving(true)
+        try {
+          backend.post(`users/${followerUsername}/${userIsFollower ? "unfollow" : "removeFollow"}`)
+          revalidate();
+        } catch (e) {
+          setRemoving(false)
+        }
+      }}
+    /></div>);
+}
+
+function UserListModal({revalidate, title, bindings, users, userIsFollower, username, cancel = false}) {
   return (
     <Modal
       blur
@@ -252,15 +284,8 @@ function UserListModal({title, bindings, users, cancel = false}) {
               </div>
 
               {cancel ?
-                <div id="modal-cancel-btn-wrapper">
-                  <Button
-                    auto
-                    icon={<CancelIcon size={20} fill="currentColor"/>}
-                    color="error"
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
-                  /></div> : null
+                <UserRemoveButton revalidate={revalidate} username={username} followerUsername={user.username}
+                                  userIsFollower={userIsFollower}/> : null
               }
 
             </Card.Body>
@@ -290,6 +315,7 @@ function nFormatter(num, digits) {
 }
 
 function UserProfile({user}) {
+  const revalidator = useRevalidator();
   const {username} = useContext(JWTContext);
   const isUser = username === user.username;
   const {setVisible: setFollowersVisible, bindings: followerBindings} = useModal();
@@ -301,54 +327,78 @@ function UserProfile({user}) {
       followed = true
   }
 
+  const [followLoading, setFollowLoading] = useState(false);
+
   return (<>
-  <UserListModal cancel={isUser} users={user.followers} title={`Followers of u/${user.username}`}
-                 bindings={followerBindings}/>
-  <UserListModal cancel={isUser} users={user.following} title={`Users Following u/${user.username}`}
-                 bindings={followingBindings}/>
-  <Card id="user-profile">
-    <Card.Header id="user-profile-header">
-      <div id="avatar-username">
-        <Avatar zoomed pointer bordered color="gradient" src={user.profileLink} css={{width: 200, height: 200}}/>
-        <div>
-          <Text h1 id="username-user-page" css={{
-            textGradient: "90deg, $secondary 0%, $primary 100%",
-          }}>{`u/${user.username}`}</Text>
-          <div id="user-count-bar">
-            <StyledButton users={user.followers} onClick={() => {
-              setFollowersVisible(true)
-            }}>
-              <Badge color="primary" enableShadow
-                     disableOutline>Followers: {nFormatter(user.followers.length, 1)}</Badge>
-            </StyledButton>
-            <StyledButton users={user.following} onClick={() => {
-              setFollowingVisible(true)
-            }}>
-              <Badge color="secondary" enableShadow
-                     disableOutline>Following: {nFormatter(user.following.length, 1)}</Badge>
-            </StyledButton>
+      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower={false} users={user.followers}
+                     title={`Followers of u/${user.username}`}
+                     bindings={followerBindings}/>
+      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower users={user.following}
+                     title={`Users Followed by u/${user.username}`}
+                     bindings={followingBindings}/>
+      <Card id="user-profile">
+        <Card.Header id="user-profile-header">
+          <div id="avatar-username">
+            <Avatar zoomed pointer bordered color="gradient"
+                    src={"https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif"}
+                    css={{width: 200, height: 200}}/>
+            <div>
+              <Text h1 id="username-user-page" css={{
+                textGradient: "90deg, $secondary 0%, $primary 100%",
+              }}>{`u/${user.username}`}</Text>
+              <div id="user-count-bar">
+                <StyledButton users={user.followers} onClick={() => {
+                  setFollowersVisible(true)
+                }}>
+                  <Badge color="primary" enableShadow
+                         disableOutline>Followers: {nFormatter(user.followers.length, 1)}</Badge>
+                </StyledButton>
+                <StyledButton users={user.following} onClick={() => {
+                  setFollowingVisible(true)
+                }}>
+                  <Badge color="secondary" enableShadow
+                         disableOutline>Following: {nFormatter(user.following.length, 1)}</Badge>
+                </StyledButton>
+              </div>
+
+            </div>
+
           </div>
+        </Card.Header>
+        <Card.Body>
+          {!isUser ?
+            <Button
+              color={followed ? "error" : "success"}
+              auto
+              css={{width: "50%", margin: "auto", marginBottom: "1rem"}}
+              disabled={followLoading}
+              onPress={
+                async () => {
+                  try {
+                    setFollowLoading(true)
+                    await backend.post(`/users/${user.username}/${followed ? "unfollow" : "follow"}`)
+                    revalidator.revalidate();
+                    setFollowLoading(false)
+                  } catch (e) {
+                    console.error(e)
+                    setFollowLoading(false)
+                  }
+                }
+              }
+            >
+              {followed ?
+                "Unfollow" : "Follow"}
+            </Button>
+            :
+            null
+          }
 
-        </div>
-
-      </div>
-    </Card.Header>
-    <Card.Body>
-      {!isUser ?
-      <Button color="success" auto css={{width: "50%", margin: "auto", marginBottom: "1rem"}} disabled={followed}>
-        {followed?
-          "Following": "Follow"}
-      </Button>
-    :
-    null
-    }
-
-    <Fields isUser={isUser} user={user} key={user.username}/>
-  </Card.Body>
-  </Card>
-</>
-)
-  ;
+          <Fields isUser={isUser} user={user} key={user.username}/>
+        </Card.Body>
+      </Card>
+    </>
+  )
+    ;
 }
 
 export default function User() {

@@ -1,6 +1,6 @@
 import './auth.css'
 
-import {Card, Text, Input, Spacer, Button} from "@nextui-org/react";
+import {Card, Text, Input, Spacer, Button, Badge} from "@nextui-org/react";
 
 import {useContext, useState, useRef, useEffect} from "react";
 import useValidationForm from "../../hooks/validationForm.js";
@@ -14,7 +14,7 @@ import {
   firstNameValidator, lastNameValidator, passwordValidator, requiredValidator,
   usernameValidator
 } from "../../util/validation.js";
-
+import backend from "../../backend/backend.js";
 
 
 export function loader({request}) {
@@ -32,7 +32,20 @@ function SignIn({setJWT, navigate}) {
   const usernameError = requiredValidator(data.username, "Username")
   const passwordError = requiredValidator(data.password, "Password")
 
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   return (<>
+    {submitError ?
+      <>
+        <Badge enableShadow disableOutline color="error">
+          {submitError}
+        </Badge>
+        <Spacer y={3}/>
+      </>
+      :
+      null
+    }
     <Input
       bordered
       labelPlaceholder="Username"
@@ -52,12 +65,30 @@ function SignIn({setJWT, navigate}) {
       {...bindings.password}
     />
     <Spacer y={3}/>
-    <Button disabled={usernameError.error || passwordError.error} shadow color="gradient" onPress={() => {
-      setAllValidate(true)
-      if (data.username === "admin" && data.password === "admin")
-        setJWT("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIn0.Xs1l2H7ui_yqE-GlQ2GARQ5ZpjuS8B8xQaooy89Q8y8")
-      navigate("/u/admin")
-    }}>Sign In</Button>
+    <Button disabled={usernameError.error || passwordError.error || submitting} shadow color="gradient"
+            onPress={async () => {
+              setAllValidate(true)
+              setSubmitting(true)
+              try {
+                const response = await backend.post("signin", data);
+                if (response.status === 200) {
+                  setJWT(response.data);
+                  navigate("/profile")
+                } else {
+                  setSubmitError("Something Went Wrong")
+                  setSubmitting(false)
+                }
+              } catch (e) {
+                if (e.response?.status === 401) {
+                  setSubmitError(e.response.data.errors[0])
+                } else {
+                  setSubmitError("Something Went Wrong")
+                }
+                setSubmitting(false)
+              }
+
+
+            }}>Sign In</Button>
   </>);
 }
 
@@ -65,6 +96,10 @@ function SignUp({setJWT, navigate}) {
   const {data, setData, validate, setAllValidate, bindings} = useValidationForm({
     firstName: "", lastName: "", username: "", email: "", age: "", contactNumber: "", password: "", confirmPassword: ""
   })
+
+
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const firstNameError = firstNameValidator(data.firstName)
   const lastNameError = lastNameValidator(data.lastName)
@@ -78,6 +113,16 @@ function SignUp({setJWT, navigate}) {
   const getStatus = (val, err) => val ? (err ? "error" : "success") : "default"
 
   return (<>
+    {submitError ?
+      <>
+        <Badge enableShadow disableOutline color="error">
+          {submitError}
+        </Badge>
+        <Spacer y={3}/>
+      </>
+      :
+      null
+    }
     <div id="field-row">
       <Input
         bordered
@@ -165,7 +210,29 @@ function SignUp({setJWT, navigate}) {
         || ageError.error
         || contactNumberError.error
         || passwordError.error
-        || confirmPasswordError.error}
+        || confirmPasswordError.error
+        || submitting
+      }
+      onPress={async () => {
+        setAllValidate(true)
+        setSubmitting(true)
+        try {
+          const response = await backend.post("users", data)
+          if (response.status === 200) {
+            setJWT(response.data);
+            navigate("/profile")
+          } else {
+            setSubmitting(false)
+            setSubmitError("Something Went Wrong")
+          }
+        } catch (e) {
+          setSubmitting(false)
+          if (e.response?.status === 403)
+            setSubmitError(e.response.data.errors[0])
+          else
+            setSubmitError("Something Went Wrong")
+        }
+      }}
     >
       Sign Up
     </Button>
