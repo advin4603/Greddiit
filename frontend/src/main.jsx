@@ -17,8 +17,10 @@ import Error from "./routes/error/error.jsx";
 import Auth, {loader as authLoader} from "./routes/auth/auth.jsx";
 import User, {loader as userLoader} from "./routes/user/user.jsx";
 import NotFound from "./routes/notFound/notFound.jsx";
-import jwtDecode from "jwt-decode";
+import MySubgreddiits from "./routes/mySubgreddiits/mySubgreddiits.jsx";
+import Subgreddiit, {loader as subgreddiitLoader} from "./routes/subgreddiit/subgreddiit.jsx";
 
+import jwtDecode from "jwt-decode";
 
 
 const lightTheme = createTheme({
@@ -76,7 +78,11 @@ const router = createBrowserRouter(createRoutesFromElements(
            errorElement={<Error/>}>
       <Route errorElement={<Error/>}>
         <Route path="u/:username" id="user" element={<Protected><User/></Protected>} loader={loaderMaker(userLoader)}/>
-        <Route path="profile" element={<Protected><Profile /></Protected>} />
+        <Route path="profile" element={<Protected><Profile/></Protected>}/>
+        <Route path="g/:subgreddiitTitle" element={<Protected><Subgreddiit/></Protected>}
+               loader={loaderMaker(subgreddiitLoader)}/>
+        <Route path="mysubgreddiits" element={<Protected><MySubgreddiits/></Protected>}/>
+
       </Route>
 
     </Route>

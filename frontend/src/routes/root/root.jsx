@@ -3,7 +3,9 @@ import {Outlet} from "react-router-dom";
 import {useNavigate} from "react-router-dom";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {useContext} from "react";
-
+import SignOutIcon from "../../icons/signOutIcon.jsx";
+import UserIcon from "../../icons/userIcon.jsx";
+import MySubgreddiitsIcon from "../../icons/mySubgreddiitsIcon.jsx";
 export default function Root() {
   const navigate = useNavigate()
   const {jwt, setJWT, username} = useContext(JWTContext);
@@ -35,6 +37,9 @@ export default function Root() {
                   case "my-profile":
                     navigate(`u/${username}`)
                     break;
+                  case "my-subgreddiits":
+                    navigate("mysubgreddiits")
+                    break;
                   default:
                     break;
                 }
@@ -49,10 +54,14 @@ export default function Root() {
                   u/{username}
                 </Text>
               </Dropdown.Item>
-              <Dropdown.Item aria-label="View Profile" key="my-profile">
+              <Dropdown.Item icon={<UserIcon /
+              >} aria-label="View Profile" key="my-profile">
                 My Profile
               </Dropdown.Item>
-              <Dropdown.Item key="signout" aria-label="Sign Out" withDivider color="error">
+              <Dropdown.Item icon={<MySubgreddiitsIcon />} aria-label="View My Subgreddiits" key="my-subgreddiits">
+                My Subgreddiits
+              </Dropdown.Item>
+              <Dropdown.Item icon={<SignOutIcon />} key="signout" aria-label="Sign Out" withDivider color="error">
                 Sign Out
               </Dropdown.Item>
             </Dropdown.Menu>
