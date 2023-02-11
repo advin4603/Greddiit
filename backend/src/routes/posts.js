@@ -16,7 +16,7 @@ postsRouter.post("/:id/upvote", async (request, response) => {
   if (post == null)
     return response.sendStatus(404)
   const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: post.postedIn.title}), findUser({username: request.username})])
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   await upvote(post, user)
@@ -29,7 +29,7 @@ postsRouter.post("/:id/downvote", async (request, response) => {
   if (post == null)
     return response.sendStatus(404)
   const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: post.postedIn.title}), findUser({username: request.username})])
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   await downvote(post, user)
@@ -41,7 +41,7 @@ postsRouter.delete("/:id/vote", async (request, response) => {
   if (post == null)
     return response.sendStatus(404)
   const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: post.postedIn.title}), findUser({username: request.username})])
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   await removeVote(post, user)
@@ -55,7 +55,7 @@ postsRouter.get("/:id", async (request, response) => {
     return response.sendStatus(404)
 
   const subgreddiit = findSubgreddiit({title: post.postedIn.title})
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   response.send(post)
@@ -101,7 +101,7 @@ postsRouter.get("/subgreddiits/:title", async (request, response) => {
   const subgreddiit = await findSubgreddiit({title: request.params.title})
   if (subgreddiit === null)
     return response.sendStatus(404)
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   const posts = await getPostsInSubgreddiit(subgreddiit);
@@ -121,7 +121,7 @@ postsRouter.post("", async (request, response, next) => {
   const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: request.body.postedIn}), findUser({username: request.username})])
   if (subgreddiit === null)
     return response.status(404)
-  if (!subgreddiit.followers.filter((follower) => (follower === request.username)))
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   try {

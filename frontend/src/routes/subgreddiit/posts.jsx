@@ -20,6 +20,7 @@ import backend from "../../backend/backend.js";
 import {useContext, useEffect, useState} from "react";
 import useAuthFetchData from "../../hooks/fetchData.js";
 import {JWTContext} from "../../contexts/jwtContext.js";
+import CommentIcon from "../../icons/commentIcon.jsx";
 
 function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
   const {data, validate, bindings: inputBindings, setData, setAllValidate} = useValidationForm({
@@ -109,8 +110,8 @@ function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
 
 function PostCard({post, cardStyle, refetch}) {
   const {username} = useContext(JWTContext);
-  const upvoted = post.upvotes.filter((upvote)=>upvote.username===username).length !== 0
-  const downvoted = post.downvotes.filter((downvote)=>downvote.username===username).length !== 0
+  const upvoted = post.upvotes.filter((upvote) => upvote.username === username).length !== 0
+  const downvoted = post.downvotes.filter((downvote) => downvote.username === username).length !== 0
 
   const [voting, setVoting] = useState(false);
   return (
@@ -139,55 +140,72 @@ function PostCard({post, cardStyle, refetch}) {
       </Card.Body>
       <Card.Divider></Card.Divider>
       <Card.Footer>
-        <Grid.Container>
+        <Grid.Container alignItems="center" justify="space-between">
           <Grid>
-            <Button
-              auto
-              light={!upvoted}
-              color="primary"
-              icon={<UpvoteIcon />}
-              disabled={voting}
-              onPress={async()=>{
-                setVoting(true)
-                try {
-                  if (upvoted)
-                    await backend.delete(`posts/${post._id}/vote`)
-                  else
-                    await backend.post(`posts/${post._id}/upvote`)
-                  await refetch();
+            <Grid.Container>
+              <Grid>
+                <Button
+                  auto
+                  light={!upvoted}
+                  color="primary"
+                  icon={<UpvoteIcon/>}
+                  disabled={voting}
+                  onPress={async () => {
+                    setVoting(true)
+                    try {
+                      if (upvoted)
+                        await backend.delete(`posts/${post._id}/vote`)
+                      else
+                        await backend.post(`posts/${post._id}/upvote`)
+                      await refetch();
 
-                } catch (e) {
-                  console.error(e)
-                }
-                setVoting(false)
-              }}
-            />
+                    } catch (e) {
+                      console.error(e)
+                    }
+                    setVoting(false)
+                  }}
+                />
+              </Grid>
+              <Grid>
+                <Button
+                  auto
+
+                  light={!downvoted}
+                  color="secondary"
+                  disabled={voting}
+                  onPress={async () => {
+                    setVoting(true)
+                    try {
+                      if (downvoted)
+                        await backend.delete(`posts/${post._id}/vote`)
+                      else
+                        await backend.post(`posts/${post._id}/downvote`)
+                      await refetch();
+
+                    } catch (e) {
+                      console.error(e)
+                    }
+                    setVoting(false)
+                  }}
+                  icon={<DownvoteIcon/>}
+                />
+              </Grid>
+            </Grid.Container>
           </Grid>
+
           <Grid>
-            <Button
-              auto
-
-              light={!downvoted}
-              color="secondary"
-              disabled={voting}
-              onPress={async ()=>{
-                setVoting(true)
-                try {
-                  if (downvoted)
-                    await backend.delete(`posts/${post._id}/vote`)
-                  else
-                    await backend.post(`posts/${post._id}/downvote`)
-                  await refetch();
-
-                } catch (e) {
-                  console.error(e)
-                }
-                setVoting(false)
-              }}
-              icon={<DownvoteIcon />}
-            />
+            <Button auto light color="primary" icon={<CommentIcon/>}/>
           </Grid>
+          {
+            post.postedBy.username === username ?
+              null :
+              <Grid>
+                {/% TODO make follow and unfollow %/}
+              </Grid>
+          }
+
         </Grid.Container>
+
       </Card.Footer>
     </Card>
   );

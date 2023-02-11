@@ -75,3 +75,20 @@ export const confirmPasswordValidator = (value, confirmValue) => {
 
   return confirmPasswordError
 }
+
+export const oneWordValidator = (value, fieldName) => {
+  let valueError = {error: false, helperText: ""}
+  const oneWordRegex = /^\S+$/;
+  if (!oneWordRegex.test(value)) valueError = {error: true, helperText : `${fieldName} must contain one word`}
+  if (value.length === 0) valueError = {error: true, helperText: `${fieldName} is required`}
+  return valueError
+}
+
+
+export const oneWordLowerCaseValidator = (value, fieldName) => {
+  let valueError = {error: false, helperText: ""}
+  const oneWordRegex = /^[^A-Z\s]+$/;
+  if (!oneWordRegex.test(value)) valueError = {error: true, helperText : `${fieldName} must contain one word and no Uppercase characters.`}
+  if (value.length === 0) valueError = {error: true, helperText: `${fieldName} is required`}
+  return valueError
+}

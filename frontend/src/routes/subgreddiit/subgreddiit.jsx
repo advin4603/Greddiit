@@ -3,12 +3,15 @@ import {useLoaderData} from "react-router-dom";
 import {Avatar, Card, Spacer, Text, Grid, Button} from "@nextui-org/react";
 import PostIcon from "../../icons/postIcon.jsx";
 import UsersIcon from "../../icons/usersIcon.jsx";
-import {useState} from "react";
+import {useContext, useState} from "react";
 import RequestsIcon from "../../icons/requestsIcon.jsx";
 import StatsIcon from "../../icons/statsIcon.jsx";
 import ReportIcon from "../../icons/reportIcon.jsx";
 import SettingsIcon from "../../icons/settingsIcon.jsx";
-import Posts from "../mySubgreddiits/posts.jsx";
+import Posts from "./posts.jsx";
+import Users from "./users.jsx";
+import Settings from "./settings.jsx";
+import {JWTContext} from "../../contexts/jwtContext.js";
 
 export async function loader({params}) {
   try {
@@ -28,17 +31,23 @@ export async function loader({params}) {
 
 const cardStyle = {width: "min(90%, 900px)", margin: "auto", padding: "0 2rem"}
 
-export default function Subgreddiit() {
-  const subgreddiit = useLoaderData();
-
-  const tabs = [
-    [<PostIcon />, "Posts", <Posts cardStyle={cardStyle} subgreddiitTitle={subgreddiit.title}/>],
-    [<UsersIcon />, "Users", <></>],
-    [<RequestsIcon />, "Join Requests", <></>],
-    [<StatsIcon />, "Stats", <></>],
-    [<ReportIcon />, "Reports", <></>],
-    [<SettingsIcon />, "Settings", <></>]
-  ];
+function SubgredditInfo({subgreddiit}) {
+  const {username} = useContext(JWTContext);
+  let tabs;
+  if (subgreddiit.moderator.username === username)
+    tabs = [
+      [<PostIcon />, "Posts", <Posts cardStyle={cardStyle} subgreddiitTitle={subgreddiit.title}/>],
+      [<UsersIcon />, "Users", <Users cardStyle={cardStyle} subgreddiit={subgreddiit}/>],
+      [<RequestsIcon />, "Join Requests", <></>],
+      [<StatsIcon />, "Stats", <></>],
+      [<ReportIcon />, "Reports", <></>],
+      [<SettingsIcon />, "Settings", <Settings cardStyle={cardStyle} subgreddiit={subgreddiit}/>]
+    ];
+  else
+    tabs = [
+      [<PostIcon />, "Posts", <Posts cardStyle={cardStyle} subgreddiitTitle={subgreddiit.title}/>],
+      [<UsersIcon />, "Users", <Users cardStyle={cardStyle} subgreddiit={subgreddiit}/>]
+    ];
 
   const [tab, setTab] = useState("Posts");
 
@@ -80,25 +89,25 @@ export default function Subgreddiit() {
       <Spacer/>
       <Card style={cardStyle}>
         <Card.Body>
-      <Grid.Container justify="space-evenly">
-        {
-          tabs.map((el)=> {
-            return (
-              <Grid key={el[1]}>
-                <Button
-                  light={el[1]!==tab}
-                  auto
-                  icon={el[0]}
-                  color="primary"
-                  onPress={()=>{setTab(el[1])}}
-                >
-                  {el[1]}
-                </Button>
-              </Grid>
-            );
-          })
-        }
-      </Grid.Container>
+          <Grid.Container justify="space-evenly">
+            {
+              tabs.map((el)=> {
+                return (
+                  <Grid key={el[1]}>
+                    <Button
+                      light={el[1]!==tab}
+                      auto
+                      icon={el[0]}
+                      color="primary"
+                      onPress={()=>{setTab(el[1])}}
+                    >
+                      {el[1]}
+                    </Button>
+                  </Grid>
+                );
+              })
+            }
+          </Grid.Container>
         </Card.Body>
       </Card>
       <Spacer />
@@ -107,4 +116,10 @@ export default function Subgreddiit() {
       }
     </>
   );
+}
+
+export default function Subgreddiit() {
+  const subgreddiit = useLoaderData();
+
+  return (<SubgredditInfo key={subgreddiit._id} subgreddiit={subgreddiit}/>)
 }

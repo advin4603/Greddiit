@@ -30,6 +30,8 @@ import CancelIcon from "../../icons/cancelIcon.jsx";
 import {Link} from "react-router-dom";
 import backend from "../../backend/backend.js";
 import {nFormatter} from "../../util/formatter.js";
+import FollowIcon from "../../icons/followIcon.jsx";
+import UnfollowIcon from "../../icons/unfollowIcon.jsx";
 
 export async function loader({params}) {
 
@@ -356,6 +358,7 @@ function UserProfile({user}) {
             <Button
               color={followed ? "error" : "success"}
               auto
+              icon={followed? <UnfollowIcon />: <FollowIcon />}
               css={{width: "50%", margin: "auto", marginBottom: "1rem"}}
               disabled={followLoading}
               onPress={
