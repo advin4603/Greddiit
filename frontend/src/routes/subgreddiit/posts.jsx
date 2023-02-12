@@ -21,6 +21,8 @@ import {useContext, useEffect, useState} from "react";
 import useAuthFetchData from "../../hooks/fetchData.js";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import CommentIcon from "../../icons/commentIcon.jsx";
+import {nFormatter} from "../../util/formatter.js";
+
 
 function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
   const {data, validate, bindings: inputBindings, setData, setAllValidate} = useValidationForm({
@@ -112,8 +114,13 @@ function PostCard({post, cardStyle, refetch}) {
   const {username} = useContext(JWTContext);
   const upvoted = post.upvotes.filter((upvote) => upvote.username === username).length !== 0
   const downvoted = post.downvotes.filter((downvote) => downvote.username === username).length !== 0
-
+  let votes = post.upvotes.length - post.downvotes.length;
+  if (votes >= 0)
+    votes = nFormatter(votes, 1);
+  else
+    votes = "-" + nFormatter(-votes, 1);
   const [voting, setVoting] = useState(false);
+
   return (
     <Card style={cardStyle}>
       <Card.Header>
@@ -142,7 +149,7 @@ function PostCard({post, cardStyle, refetch}) {
       <Card.Footer>
         <Grid.Container alignItems="center" justify="space-between">
           <Grid>
-            <Grid.Container>
+            <Grid.Container gap={1} alignItems="center">
               <Grid>
                 <Button
                   auto
@@ -165,6 +172,12 @@ function PostCard({post, cardStyle, refetch}) {
                     setVoting(false)
                   }}
                 />
+              </Grid>
+              <Grid>
+                <Text b>
+                  {votes}
+                </Text>
+
               </Grid>
               <Grid>
                 <Button
@@ -199,9 +212,10 @@ function PostCard({post, cardStyle, refetch}) {
           {
             post.postedBy.username === username ?
               null :
-              <Grid>
-                {/% TODO make follow and unfollow %/}
-              </Grid>
+              // <Grid>
+              //   {/% TODO make follow and unfollow %/}
+              // </Grid>
+              null
           }
 
         </Grid.Container>

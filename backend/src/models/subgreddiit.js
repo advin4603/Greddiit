@@ -23,7 +23,8 @@ const subgreddiitSchema = new Schema({
   rejectedUsers: [{
     rejectedUser: {type: Schema.Types.ObjectId, ref: "User"},
     rejectionExpiry: {type: Date, default: () => Date.now() + rejectionExpiryDays * 24 * 60 * 60 * 1000}
-  }]
+  }],
+  exFollowers: [{type: Schema.Types.ObjectId, ref: "User"}]
 
 }, {timestamps: true})
 

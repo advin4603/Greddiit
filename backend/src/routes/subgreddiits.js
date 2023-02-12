@@ -10,7 +10,7 @@ const {
   removeBannedKeyword,
   updateSubgreddiit,
   requestSubgreddiitJoin,
-  approveSubgreddiitJoin, rejectSubgreddiitJoin
+  approveSubgreddiitJoin, rejectSubgreddiitJoin, createSubgreddiitOutsiderView, createSubgreddiitFollowerView
 } = require("../controllers/subgreddiitController")
 const {findUser} = require("../controllers/userController")
 const {getPostsInSubgreddiit} = require("../controllers/postController");
@@ -115,6 +115,8 @@ subgreddiitsRouter.post("/:title/join", async (request, response) => {
                                         }) => (rejectedUser.username === request.username && new Date() < rejectionExpiry)).length)
     return response.sendStatus(405)
 
+  if (subgreddiit.exFollowers.filter((follower) => (follower.username === request.username)).length)
+
   await requestSubgreddiitJoin(subgreddiit, user)
   response.sendStatus(200)
 })
@@ -151,7 +153,13 @@ subgreddiitsRouter.get("/:title", async (request, response) => {
   if (subgreddiit === null)
     return response.sendStatus(404)
   if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
-    return response.sendStatus(401)
+    return response.send(
+      createSubgreddiitOutsiderView(subgreddiit, request.username)
+    )
+  if (subgreddiit.moderator.username !== request.username)
+    return response.send(
+      createSubgreddiitFollowerView(subgreddiit)
+    )
   response.send(subgreddiit)
 })
 

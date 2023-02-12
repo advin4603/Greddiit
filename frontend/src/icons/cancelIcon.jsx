@@ -1,4 +1,4 @@
-import {X} from "phosphor-react";
+import {XCircle} from "phosphor-react";
 
 export default function CancelIcon ({
                                     fill = 'currentColor',
@@ -10,7 +10,7 @@ export default function CancelIcon ({
                                     ...props
                                   }) {
   return (
-    <X
+    <XCircle
       width={size || width || 32}
       height={size || height || 32}
       {...props}

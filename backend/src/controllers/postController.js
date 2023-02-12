@@ -41,6 +41,14 @@ async function removeVote(post, user) {
   })
 }
 
+function censor(text, bannedKeywords) {
+  for (const bannedKeyword of bannedKeywords) {
+    let regex = new RegExp(bannedKeyword, "i")
+    text = text.replace(regex, "*".repeat(bannedKeyword.length))
+  }
+  return text
+}
+
 module.exports = {
-  createNewPost, updatePost, deletePost, findPostID, getPostsInSubgreddiit, upvote, downvote, removeVote
+  createNewPost, updatePost, deletePost, findPostID, getPostsInSubgreddiit, upvote, downvote, removeVote, censor
 }

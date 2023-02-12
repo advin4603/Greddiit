@@ -4,7 +4,7 @@ const {
   findPostID,
   getPostsInSubgreddiit,
   deletePost,
-  updatePost, upvote, downvote, removeVote
+  updatePost, upvote, downvote, removeVote, censor
 } = require("../controllers/postController")
 const {findUser} = require("../controllers/userController");
 const {findSubgreddiit} = require("../controllers/subgreddiitController");
@@ -58,6 +58,8 @@ postsRouter.get("/:id", async (request, response) => {
   if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
+  post.title = censor(post.title, subgreddiit.bannedKeywords)
+  post.post = censor(post.post, subgreddiit.bannedKeywords)
   response.send(post)
 })
 
@@ -104,7 +106,13 @@ postsRouter.get("/subgreddiits/:title", async (request, response) => {
   if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
-  const posts = await getPostsInSubgreddiit(subgreddiit);
+  let posts = await getPostsInSubgreddiit(subgreddiit);
+  posts = posts.map((post)=>{
+    post.title = censor(post.title, subgreddiit.bannedKeywords)
+    post.post = censor(post.post, subgreddiit.bannedKeywords)
+    return post
+  })
+
   return response.send(posts);
 })
 

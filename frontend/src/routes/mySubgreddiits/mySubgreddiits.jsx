@@ -136,8 +136,9 @@ function SubgreddiitCard({subgreddiit, refetch}) {
           <Grid>
             <Button
               auto
-              icon={<CancelIcon size={20} fill="currentColor"/>}
+              icon={<CancelIcon size={30} fill="currentColor"/>}
               color="error"
+              light
               disabled={deleting}
               onPress={async () => {
                 setDeleting(true)

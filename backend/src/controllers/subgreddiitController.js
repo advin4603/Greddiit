@@ -23,6 +23,38 @@ async function removeBannedKeyword(subgreddiit, bannedKeyword) {
   await Subgreddiit.updateOne({_id: subgreddiit._id}, {$pull: {bannedKeywords: bannedKeyword}})
 }
 
+function createSubgreddiitFollowerView(subgreddiit) {
+  return {
+    title: subgreddiit.title,
+    description: subgreddiit.description,
+    tags: subgreddiit.tags,
+    bannedKeywords: subgreddiit.bannedKeywords,
+    moderator: subgreddiit.moderator,
+    followers: subgreddiit.followers,
+    createdAt: subgreddiit.createdAt,
+    blockedUsers: subgreddiit.blockedUsers,
+    exFollowers: subgreddiit.exFollowers
+  }
+}
+
+function createSubgreddiitOutsiderView(subgreddiit, username) {
+  return {
+    title: subgreddiit.title,
+    description: subgreddiit.description,
+    tags: subgreddiit.tags,
+    moderator: subgreddiit.moderator,
+    requested: subgreddiit.followRequests.filter((follower) => (follower.username === username)).length !== 0,
+    blocked: subgreddiit.blockedUsers.filter((blocked) => (blocked.username === username)).length !== 0,
+    exFollower: subgreddiit.exFollowers.filter((follower) => (follower.username === username)).length !== 0,
+    rejections: subgreddiit.rejectedUsers.filter(({
+                                                    rejectedUser,
+                                                    rejectionExpiry
+                                                  }) => (rejectedUser.username === username)),
+    followerCount: subgreddiit.followers.length,
+    createdAt: subgreddiit.createdAt
+  }
+}
+
 async function findSubgreddiit(search) {
   const subgreddiit = await Subgreddiit
     .findOne(search)
@@ -76,5 +108,7 @@ module.exports = {
   deleteSubgreddiit,
   requestSubgreddiitJoin,
   approveSubgreddiitJoin,
-  rejectSubgreddiitJoin
+  rejectSubgreddiitJoin,
+  createSubgreddiitOutsiderView,
+  createSubgreddiitFollowerView
 }

@@ -84,6 +84,7 @@ function EditableField({
             <Button
               css={{marginLeft: 10, width: 30, height: 30}}
               disabled={error}
+              light
               onPress={async () => {
                 setSubmitting(true)
                 let submitData = {}
@@ -107,7 +108,7 @@ function EditableField({
               }}
               auto
               color="success"
-              icon={<EditIcon size={20} fill="currentColor" filled/>}
+              icon={<EditIcon size={30} fill="currentColor" filled/>}
             />
             <Button
               css={{marginLeft: 10, width: 30, height: 30}}
@@ -115,7 +116,8 @@ function EditableField({
                 setValue(value)
               }}
               auto
-              icon={<CancelIcon size={20} fill="currentColor"/>}
+              light
+              icon={<CancelIcon size={30} fill="currentColor"/>}
               color="error"
             />
           </>
