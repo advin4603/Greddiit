@@ -1,5 +1,6 @@
 const Post = require("../models/post")
-
+const Report = require("../models/report")
+const Comment = require("../models/comment")
 
 async function createNewPost({title, post, postedBy, postedIn}) {
   const newPost = new Post({title, post, postedBy: postedBy._id, postedIn: postedIn._id})
@@ -12,11 +13,17 @@ async function updatePost(post, update) {
 }
 
 async function deletePost(post) {
-  await Post.deleteOne({_id: post._id})
+  await Promise.all([
+    Post.deleteOne({_id: post._id}),
+    Report.deleteMany({post: post._id}),
+    Comment.deleteMany({commentedOn: post._id})
+  ])
 }
 
-async function findPostID(id) {
-  return Post.findById(id).populate("postedBy", "username").populate("postedIn", "title")
+async function findPostID(id, populate_subggreddiit_with_title = true) {
+  if (populate_subggreddiit_with_title)
+    return Post.findById(id).populate("postedBy", "username").populate("postedIn", "title").populate("upvotes", "username").populate("downvotes", "username")
+  return Post.findById(id).populate("postedBy", "username").populate("postedIn").populate("upvotes", "username").populate("downvotes", "username")
 }
 
 async function getPostsInSubgreddiit(subgreddiit) {
@@ -24,19 +31,19 @@ async function getPostsInSubgreddiit(subgreddiit) {
 }
 
 async function upvote(post, user) {
-  return Post.updateOne({_id: post.id}, {
+  return Post.updateOne({_id: post._id}, {
     $addToSet: {upvotes: user._id}, $pull: {downvotes: user._id}
   })
 }
 
 async function downvote(post, user) {
-  return Post.updateOne({_id: post.id}, {
+  return Post.updateOne({_id: post._id}, {
     $addToSet: {downvotes: user._id}, $pull: {upvotes: user._id}
   })
 }
 
 async function removeVote(post, user) {
-  return Post.updateOne({_id: post.id}, {
+  return Post.updateOne({_id: post._id}, {
     $pull: {downvotes: user._id, upvotes: user._id},
   })
 }

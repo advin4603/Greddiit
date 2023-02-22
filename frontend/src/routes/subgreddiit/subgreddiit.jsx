@@ -12,8 +12,10 @@ import Posts from "./posts.jsx";
 import Users from "./users.jsx";
 import Settings from "./settings.jsx";
 import Requests from "./requests.jsx";
+import Reports from "./reports.jsx";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {nFormatter} from "../../util/formatter.js";
+import useAuthFetchData from "../../hooks/fetchData.js";
 
 export async function loader({params, request}) {
   try {
@@ -26,14 +28,12 @@ export async function loader({params, request}) {
       return {subgreddiit: response.data, tab}
     }
   } catch (e) {
-    console.log(e)
+    console.error(e)
     throw new Response("", {
       status: 404,
       statusText: "Subgreddiit Not Found"
     })
   }
-
-
 }
 
 
@@ -50,7 +50,7 @@ function SubgredditInfo({subgreddiit, tab}) {
       [<UsersIcon/>, "Users", <Users cardStyle={cardStyle} subgreddiit={subgreddiit}/>],
       [<RequestsIcon/>, "Join Requests", <Requests cardStyle={cardStyle} subgreddiit={subgreddiit}/>],
       [<StatsIcon/>, "Stats", <></>],
-      [<ReportIcon/>, "Reports", <></>],
+      [<ReportIcon/>, "Reports", <Reports subgreddiit={subgreddiit} cardStyle={cardStyle}/>],
       [<SettingsIcon/>, "Settings", <Settings cardStyle={cardStyle} subgreddiit={subgreddiit}/>]
     ];
     notJoined = false

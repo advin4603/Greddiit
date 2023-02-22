@@ -10,10 +10,12 @@ const {
   removeBannedKeyword,
   updateSubgreddiit,
   requestSubgreddiitJoin,
-  approveSubgreddiitJoin, rejectSubgreddiitJoin, createSubgreddiitOutsiderView, createSubgreddiitFollowerView
+  approveSubgreddiitJoin, rejectSubgreddiitJoin, createSubgreddiitOutsiderView, createSubgreddiitFollowerView,
+  getJoinedSubgreddiits, getNotJoinedSubgreddiits, removeFollower
 } = require("../controllers/subgreddiitController")
 const {findUser} = require("../controllers/userController")
 const {getPostsInSubgreddiit} = require("../controllers/postController");
+const {getReportsInSubgreddiit} = require("../controllers/reportController");
 
 const subgreddiitsRouter = Router()
 
@@ -26,6 +28,16 @@ subgreddiitsRouter.get("/moderated", async (request, response) => {
     subgreddiits[i] = {...subgreddiits[i]._doc, postCount: posts[i].length}
   }
   return response.send(subgreddiits)
+})
+
+subgreddiitsRouter.get("/:title/reports", async (request, response) => {
+  const subgreddiit = await findSubgreddiit({title: request.params.title})
+  if (subgreddiit === null)
+    return response.sendStatus(404)
+  if (subgreddiit.moderator.username !== request.username)
+    return response.sendStatus(401)
+  const reports = await getReportsInSubgreddiit(subgreddiit)
+  return response.send(reports)
 })
 
 
@@ -114,11 +126,23 @@ subgreddiitsRouter.post("/:title/join", async (request, response) => {
                                           rejectionExpiry
                                         }) => (rejectedUser.username === request.username && new Date() < rejectionExpiry)).length)
     return response.sendStatus(405)
-
   if (subgreddiit.exFollowers.filter((follower) => (follower.username === request.username)).length)
-
+    return response.sendStatus(405)
   await requestSubgreddiitJoin(subgreddiit, user)
   response.sendStatus(200)
+})
+
+subgreddiitsRouter.post("/:title/leave", async (request, response) => {
+  const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: request.params.title}), findUser({username: request.username})])
+  if (subgreddiit === null)
+    return response.sendStatus(404)
+  if (subgreddiit.moderator.username === request.username)
+    return response.sendStatus(405)
+
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
+    return response.sendStatus(405)
+  await removeFollower(subgreddiit, user)
+  return response.sendStatus(200)
 })
 
 subgreddiitsRouter.post("/:title/approveJoin", async (request, response) => {
@@ -220,6 +244,35 @@ subgreddiitsRouter.post("", async (request, response, next) => {
   } catch (e) {
     next(e)
   }
+})
+
+subgreddiitsRouter.get("", async (request, response) => {
+  const user = await findUser({username: request.username})
+  let [joinedSubgreddiits, notJoinedSubgreddiits] = await Promise.all([
+    getJoinedSubgreddiits(user),
+    getNotJoinedSubgreddiits(user)
+  ])
+  joinedSubgreddiits = joinedSubgreddiits.map((subgreddiit) => (subgreddiit.moderator === request.username) ? subgreddiit : createSubgreddiitFollowerView(subgreddiit))
+  notJoinedSubgreddiits = notJoinedSubgreddiits.map((subgreddiit) => createSubgreddiitOutsiderView(subgreddiit, request.username))
+
+  let joinedSubgreddiitsPostsPromises = Promise.all(joinedSubgreddiits.map(subgreddiit => (getPostsInSubgreddiit(subgreddiit))))
+  let notJoinedSubgreddiitsPostsPromises = Promise.all(notJoinedSubgreddiits.map(subgreddiit => (getPostsInSubgreddiit(subgreddiit))))
+
+  let [joinedSubgreddiitsPosts, notJoinedSubgreddiitsPosts] = await Promise.all([joinedSubgreddiitsPostsPromises, notJoinedSubgreddiitsPostsPromises])
+
+  joinedSubgreddiits = joinedSubgreddiits.map((subgreddiit, index) => {
+    return (subgreddiit.moderator === request.username) ? {
+      ...subgreddiit.data,
+      postCount: joinedSubgreddiitsPosts[index].length
+    } : {...subgreddiit, postCount: joinedSubgreddiitsPosts[index].length}
+  })
+
+  notJoinedSubgreddiits = notJoinedSubgreddiits.map((subgreddiit, index) => {
+    return {
+      ...subgreddiit, postCount: notJoinedSubgreddiitsPosts[index].length
+    }
+  })
+  response.send({joinedSubgreddiits, notJoinedSubgreddiits})
 })
 
 

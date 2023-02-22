@@ -1,5 +1,14 @@
 const {Router} = require("express");
-const {findUser, updateUser, followUser, unfollowUser} = require("../controllers/userController")
+const {
+  findUser,
+  updateUser,
+  followUser,
+  unfollowUser,
+  getSavedPostsIDs,
+  addSavedPost, removeSavedPost
+} = require("../controllers/userController")
+const {findSubgreddiit} = require("../controllers/subgreddiitController");
+const {censor, findPostID} = require("../controllers/postController");
 
 const usersRouter = Router()
 
@@ -9,6 +18,47 @@ usersRouter.get("/:username", async (request, response) => {
     return response.sendStatus(404)
 
   response.send(user)
+})
+
+usersRouter.get("/:username/savedPosts", async (request, response) => {
+  if (request.params.username !== request.username)
+    return response.sendStatus(401)
+  const savedPosts = await getSavedPostsIDs(request.username);
+  return response.send(savedPosts)
+})
+
+usersRouter.post("/:username/savedPosts", async (request, response) => {
+  if (request.params.username !== request.username)
+    return response.sendStatus(401)
+  if (request.body.postID === undefined)
+    return response.sendStatus(400)
+  let post, subgreddiit;
+  if (request.body.subgreddiitTitle === undefined) {
+    post = await findPostID(request.body.postID)
+    subgreddiit = await findSubgreddiit({_id: post.postedIn.title})
+  } else {
+    [post, subgreddiit] = await Promise.all([
+      findPostID(request.body.postID),
+      findSubgreddiit({title: request.body.subgreddiitTitle})
+    ])
+    if (post.postedIn.title !== subgreddiit.title)
+      return response.sendStatus(404)
+  }
+
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
+    return response.sendStatus(401)
+
+  await addSavedPost(request.username, post)
+  return response.sendStatus(200)
+})
+
+usersRouter.delete("/:username/savedPosts", async (request, response) => {
+  if (request.params.username !== request.username)
+    return response.sendStatus(401)
+  if (request.body.postID === undefined)
+    return response.sendStatus(400)
+  await removeSavedPost(request.username, request.body.postID)
+  return response.sendStatus(200)
 })
 
 usersRouter.patch("/:username", async (request, response, next) => {

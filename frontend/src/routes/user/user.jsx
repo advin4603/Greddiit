@@ -82,7 +82,6 @@ function EditableField({
           :
           <>
             <Button
-              css={{marginLeft: 10, width: 30, height: 30}}
               disabled={error}
               light
               onPress={async () => {
@@ -106,20 +105,22 @@ function EditableField({
 
                 }
               }}
-              auto
+              css={{minWidth: "fit-content"}}
               color="success"
-              icon={<EditIcon size={30} fill="currentColor" filled/>}
-            />
+            >
+              <EditIcon size={30} fill="currentColor" filled/>
+            </Button>
             <Button
-              css={{marginLeft: 10, width: 30, height: 30}}
+              css={{minWidth: "fit-content"}}
               onPress={() => {
                 setValue(value)
               }}
-              auto
               light
-              icon={<CancelIcon size={30} fill="currentColor"/>}
+              icon
               color="error"
-            />
+            >
+              <CancelIcon size={30} fill="currentColor"/>
+            </Button>
           </>
         }
 
@@ -235,22 +236,25 @@ function UserRemoveButton({username, followerUsername, userIsFollower, revalidat
   return (<div id="modal-cancel-btn-wrapper">
     <Button
       disabled={removing}
-      auto
-      icon={<CancelIcon size={20} fill="currentColor"/>}
+      css={{ minWidth: "fit-content" }}
       color="error"
-      onPress={() => {
+      light
+      onPress={async () => {
         setRemoving(true)
         try {
-          backend.post(`users/${followerUsername}/${userIsFollower ? "unfollow" : "removeFollow"}`)
+          await backend.post(`users/${followerUsername}/${userIsFollower ? "unfollow" : "removeFollow"}`)
           revalidate();
         } catch (e) {
           setRemoving(false)
         }
       }}
-    /></div>);
+    >
+      <CancelIcon size={30} fill="currentColor"/>
+    </Button></div>);
 }
 
 function UserListModal({revalidate, title, bindings, users, userIsFollower, username, cancel = false}) {
+
   return (
     <Modal
       blur
@@ -269,12 +273,12 @@ function UserListModal({revalidate, title, bindings, users, userIsFollower, user
       <Modal.Body id="modal-body-container">
         {users.map((user) => (
 
-          <Card key={user.username} id="user-card" variant="bordered">
+          <Card key={user.username} style={{overflow: "initial"}} variant="bordered">
             <Card.Body id="user-card-body">
               <div id="modal-user-info-wrapper">
                 <UserInfo
                   size="lg"
-                  src={user.profileLink}
+                  src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
                   bordered
                 >
                   <LinkDisplay block color="primary" as={"div"}>
@@ -303,7 +307,6 @@ function UserListModal({revalidate, title, bindings, users, userIsFollower, user
 }
 
 
-
 function UserProfile({user}) {
   const revalidator = useRevalidator();
   const {username} = useContext(JWTContext);
@@ -320,10 +323,12 @@ function UserProfile({user}) {
   const [followLoading, setFollowLoading] = useState(false);
 
   return (<>
-      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower={false} users={user.followers}
+      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower={false}
+                     users={user.followers}
                      title={`Followers of u/${user.username}`}
                      bindings={followerBindings}/>
-      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower users={user.following}
+      <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower
+                     users={user.following}
                      title={`Users Followed by u/${user.username}`}
                      bindings={followingBindings}/>
       <Card id="user-profile">
@@ -333,8 +338,8 @@ function UserProfile({user}) {
                     src={"https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif"}
                     css={{width: 200, height: 200}}/>
             <div>
-              <Text h1 id="username-user-page" css={{
-                textGradient: "90deg, $secondary 0%, $primary 100%",
+              <Text h2 id="username-user-page" css={{
+                textGradient: "90deg, $secondary 0%, $primary 100%"
               }}>{`u/${user.username}`}</Text>
               <div id="user-count-bar">
                 <StyledButton users={user.followers} onClick={() => {
@@ -360,14 +365,14 @@ function UserProfile({user}) {
             <Button
               color={followed ? "error" : "success"}
               auto
-              icon={followed? <UnfollowIcon />: <FollowIcon />}
+              icon={followed ? <UnfollowIcon/> : <FollowIcon/>}
               css={{width: "50%", margin: "auto", marginBottom: "1rem"}}
               disabled={followLoading}
               onPress={
                 async () => {
                   try {
                     setFollowLoading(true)
-                    await backend.post(`/users/${user.username}/${followed ? "unfollow" : "follow"}`)
+                    await backend.post(`users/${user.username}/${followed ? "unfollow" : "follow"}`)
                     revalidator.revalidate();
                     setFollowLoading(false)
                   } catch (e) {

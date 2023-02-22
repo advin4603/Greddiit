@@ -24,6 +24,7 @@ import useAuthFetchData from "../../hooks/fetchData.js";
 import CancelIcon from "../../icons/cancelIcon.jsx";
 import PostIcon from "../../icons/postIcon.jsx";
 import {nFormatter} from "../../util/formatter.js";
+import Fuse from 'fuse.js'
 
 const cardStyle = {width: "min(90%, 700px)", margin: "auto", padding: "0 2rem"}
 
@@ -136,7 +137,6 @@ function SubgreddiitCard({subgreddiit, refetch}) {
           <Grid>
             <Button
               auto
-              icon={<CancelIcon size={30} fill="currentColor"/>}
               color="error"
               light
               disabled={deleting}
@@ -150,7 +150,9 @@ function SubgreddiitCard({subgreddiit, refetch}) {
                   setDeleting(false)
                 }
               }}
-            />
+            >
+                <CancelIcon size={30} fill="currentColor"/>
+            </Button>
           </Grid>
         </Grid.Container>
       </Card.Header>

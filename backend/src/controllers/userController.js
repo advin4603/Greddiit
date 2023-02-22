@@ -2,7 +2,7 @@ const User = require("../models/user")
 
 
 async function findUser(search) {
-  const user = await User.findOne(search).populate("followers", "username").populate("following", "username");
+  const user = await User.findOne(search, "-savedPosts").populate("followers", "username").populate("following", "username");
   return user;
 }
 
@@ -10,6 +10,19 @@ async function createNewUser({username, firstName, lastName, email, age, contact
   const newUser = new User({username, firstName, lastName, email, age, contactNumber})
   await newUser.save();
   return newUser
+}
+
+async function addSavedPost(username, post) {
+  return User.updateOne({username}, {$addToSet: {savedPosts: post._id}})
+}
+
+async function removeSavedPost(username, postID) {
+  return User.updateOne({username}, {$pull: {savedPosts: postID}})
+}
+
+async function getSavedPostsIDs(username) {
+  const user = await User.findOne({username})
+  return user.savedPosts
 }
 
 async function followUser(follower, toBeFollowed) {
@@ -30,4 +43,13 @@ async function updateUser(username, update) {
   await User.findOneAndUpdate({username}, update)
 }
 
-module.exports = {createNewUser, findUser, updateUser, followUser, unfollowUser}
+module.exports = {
+  createNewUser,
+  findUser,
+  updateUser,
+  followUser,
+  unfollowUser,
+  addSavedPost,
+  removeSavedPost,
+  getSavedPostsIDs
+}

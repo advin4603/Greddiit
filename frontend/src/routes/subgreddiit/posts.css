@@ -1,0 +1,9 @@
+#comment-input {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+#comment-input > div {
+    width: 100%;
+}

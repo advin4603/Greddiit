@@ -20,7 +20,8 @@ const userSchema = new Schema({
     match: [/^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/, "Invalid Contact Number"]
   },
   followers: [{type: Schema.Types.ObjectId, ref: "User"}],
-  following: [{type: Schema.Types.ObjectId, ref: "User"}]
+  following: [{type: Schema.Types.ObjectId, ref: "User"}],
+  savedPosts: [{type: Schema.Types.ObjectId, ref: "Post"}]
 
 }, {timestamps: true})
 

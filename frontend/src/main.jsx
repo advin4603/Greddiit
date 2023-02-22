@@ -22,6 +22,7 @@ import Subgreddiit, {loader as subgreddiitLoader} from "./routes/subgreddiit/sub
 import Explore from "./routes/explore/explore.jsx";
 
 import jwtDecode from "jwt-decode";
+import SavedPosts, {loader as savedPostsLoader} from "./routes/savedPosts/savedPosts";
 
 
 const lightTheme = createTheme({
@@ -52,12 +53,11 @@ function OnlyUnauthorized({children}) {
 }
 
 function preLoader() {
-  if (!isAuthTokenSet()) {
-    const jwt = JSON.parse(localStorage.getItem("jwt"))
-    if (jwt === null)
-      return
+  let jwt = JSON.parse(localStorage.getItem("jwt"))
+  if (jwt !== null)
     setAuthToken(jwt)
-  }
+  const username = jwt === null ? null : jwtDecode(jwt).username;
+  return {username, jwt}
 }
 
 function Profile() {
@@ -67,8 +67,8 @@ function Profile() {
 
 function loaderMaker(loader) {
   return async (args) => {
-    preLoader()
-    return loader(args)
+    const authInfo = preLoader()
+    return loader(args, authInfo)
   }
 }
 
@@ -84,7 +84,7 @@ const router = createBrowserRouter(createRoutesFromElements(
                loader={loaderMaker(subgreddiitLoader)}/>
         <Route path="mysubgreddiits" element={<Protected><MySubgreddiits/></Protected>}/>
         <Route path="explore" element={<Protected><Explore/></Protected>}/>
-
+        <Route path="savedposts" element={<Protected><SavedPosts/></Protected>} loader={loaderMaker(savedPostsLoader)}/>
       </Route>
 
     </Route>

@@ -1,4 +1,4 @@
-const {Router, request, response} = require("express")
+const {Router} = require("express")
 const {
   createNewPost,
   findPostID,
@@ -8,12 +8,13 @@ const {
 } = require("../controllers/postController")
 const {findUser} = require("../controllers/userController");
 const {findSubgreddiit} = require("../controllers/subgreddiitController");
+const {getCommentsOnPost} = require("../controllers/commentController");
 
 const postsRouter = Router()
 
 postsRouter.post("/:id/upvote", async (request, response) => {
   const post = await findPostID(request.params.id)
-  if (post == null)
+  if (post === null)
     return response.sendStatus(404)
   const [subgreddiit, user] = await Promise.all([findSubgreddiit({title: post.postedIn.title}), findUser({username: request.username})])
   if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
@@ -48,18 +49,46 @@ postsRouter.delete("/:id/vote", async (request, response) => {
   response.sendStatus(200)
 })
 
+postsRouter.get("/:id/comments", async (request, response) => {
+  const post = await findPostID(request.params.id)
+  if (post == null)
+    return response.sendStatus(404)
+  const subgreddiit = await findSubgreddiit({title: post.postedIn.title})
+  if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
+    return response.sendStatus(401)
+
+  let comments = await getCommentsOnPost(post)
+  comments = comments.map((comment) => {
+    comment.comment = censor(comment.comment, subgreddiit.bannedKeywords)
+    if (subgreddiit.moderator.username !== request.username && subgreddiit.blockedUsers.filter(
+      blockedUser =>
+        blockedUser.username === comment.commentedBy.username
+    ).length > 0) {
+      comment._doc.commentedBy = {username: "[blocked User]"}
+    }
+    return comment
+  })
+  response.send(comments)
+})
+
 
 postsRouter.get("/:id", async (request, response) => {
   const post = await findPostID(request.params.id)
   if (post == null)
     return response.sendStatus(404)
 
-  const subgreddiit = findSubgreddiit({title: post.postedIn.title})
+  const subgreddiit = await findSubgreddiit({title: post.postedIn.title})
   if (!subgreddiit.followers.filter((follower) => (follower.username === request.username)).length)
     return response.sendStatus(401)
 
   post.title = censor(post.title, subgreddiit.bannedKeywords)
   post.post = censor(post.post, subgreddiit.bannedKeywords)
+  if (subgreddiit.moderator.username !== request.username && subgreddiit.blockedUsers.filter(
+    blockedUser =>
+      blockedUser.username === post.postedBy.username
+  ).length > 0) {
+    post._doc.postedBy = {username: "[blocked User]"}
+  }
   response.send(post)
 })
 
@@ -107,9 +136,15 @@ postsRouter.get("/subgreddiits/:title", async (request, response) => {
     return response.sendStatus(401)
 
   let posts = await getPostsInSubgreddiit(subgreddiit);
-  posts = posts.map((post)=>{
+  posts = posts.map((post) => {
     post.title = censor(post.title, subgreddiit.bannedKeywords)
     post.post = censor(post.post, subgreddiit.bannedKeywords)
+    if (subgreddiit.moderator.username !== request.username && subgreddiit.blockedUsers.filter(
+      blockedUser =>
+        blockedUser.username === post.postedBy.username
+    ).length > 0) {
+      post._doc.postedBy = {username: "[blocked User]"}
+    }
     return post
   })
 
