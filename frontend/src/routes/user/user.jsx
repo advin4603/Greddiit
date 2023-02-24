@@ -1,6 +1,6 @@
 import './user.css'
 
-import {useLoaderData, useRevalidator} from "react-router-dom";
+import {unstable_usePrompt, useLoaderData, useRevalidator} from "react-router-dom";
 import {
   Card,
   Avatar,
@@ -16,7 +16,7 @@ import {
   Link as LinkDisplay, Spacer
 } from "@nextui-org/react";
 import {JWTContext} from "../../contexts/jwtContext.js";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import useValidationForm from "../../hooks/validationForm.js";
 import {
   contactNumberValidator,
@@ -157,6 +157,14 @@ function Fields({user, isUser}) {
   const DataField = isUser ? EditableField : Field;
   const [error, setError] = useState("")
 
+  let changed = !(data.firstName === user.firstName
+    && data.lastName === user.lastName
+    && data.email === user.email
+    && data.age === user.age
+    && data.contactNumber === user.contactNumber)
+
+  unstable_usePrompt({when: changed, message: "You have unsaved changes. Navigate to a different page?"})
+
   return (<>
       {error ?
         <>
@@ -236,7 +244,7 @@ function UserRemoveButton({username, followerUsername, userIsFollower, revalidat
   return (<div id="modal-cancel-btn-wrapper">
     <Button
       disabled={removing}
-      css={{ minWidth: "fit-content" }}
+      css={{minWidth: "fit-content"}}
       color="error"
       light
       onPress={async () => {
@@ -278,7 +286,7 @@ function UserListModal({revalidate, title, bindings, users, userIsFollower, user
               <div id="modal-user-info-wrapper">
                 <UserInfo
                   size="lg"
-                  src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+                  src={`${backend.defaults.baseURL}users/${user.username}/profilePic`}
                   bordered
                 >
                   <LinkDisplay block color="primary" as={"div"}>
@@ -321,8 +329,27 @@ function UserProfile({user}) {
   }
 
   const [followLoading, setFollowLoading] = useState(false);
+  const handleImageUpload = async(e) => {
+    const files = e.target.files;
+    if (files.length === 0) {
+      return
+    }
+    const file = files[0]
+    const formData = new FormData();
+    formData.append("image", file)
+    try {
+      const response = await backend.post("users/profilePic", formData)
+      if (response.status===200)
+        revalidator.revalidate()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const inputRef = useRef(null);
 
   return (<>
+      <input multiple={false} accept="image/*" type="file" ref={inputRef} style={{display: "none"}} onChange={handleImageUpload}/>
       <UserListModal revalidate={revalidator.revalidate} cancel={isUser} username={username} userIsFollower={false}
                      users={user.followers}
                      title={`Followers of u/${user.username}`}
@@ -334,9 +361,17 @@ function UserProfile({user}) {
       <Card id="user-profile">
         <Card.Header id="user-profile-header">
           <div id="avatar-username">
-            <Avatar zoomed pointer bordered color="gradient"
-                    src={"https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif"}
-                    css={{width: 200, height: 200}}/>
+            <Avatar
+              zoomed={isUser}
+              pointer={isUser}
+              bordered
+              onClick={isUser?async()=>{
+                inputRef.current.click()
+              }:undefined}
+              color="gradient"
+              src={`${backend.defaults.baseURL}users/${user.username}/profilePic`}
+              css={{width: 200, height: 200}}
+            />
             <div>
               <Text h2 id="username-user-page" css={{
                 textGradient: "90deg, $secondary 0%, $primary 100%"

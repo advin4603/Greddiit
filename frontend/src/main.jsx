@@ -20,6 +20,7 @@ import NotFound from "./routes/notFound/notFound.jsx";
 import MySubgreddiits from "./routes/mySubgreddiits/mySubgreddiits.jsx";
 import Subgreddiit, {loader as subgreddiitLoader} from "./routes/subgreddiit/subgreddiit.jsx";
 import Explore from "./routes/explore/explore.jsx";
+import Index from "./routes/root/index.jsx";
 
 import jwtDecode from "jwt-decode";
 import SavedPosts, {loader as savedPostsLoader} from "./routes/savedPosts/savedPosts";
@@ -78,6 +79,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Protected><Root/></Protected>}
            errorElement={<Error/>}>
       <Route errorElement={<Error/>}>
+        <Route index element={<Index />}></Route>
         <Route path="u/:username" id="user" element={<Protected><User/></Protected>} loader={loaderMaker(userLoader)}/>
         <Route path="profile" element={<Protected><Profile/></Protected>}/>
         <Route path="g/:subgreddiitTitle" element={<Protected><Subgreddiit/></Protected>}

@@ -120,7 +120,8 @@ async function requestSubgreddiitJoin(subgreddiit, user) {
 async function approveSubgreddiitJoin(subgreddiit, user) {
   return Subgreddiit.updateOne({_id: subgreddiit._id}, {
     $pull: {followRequests: user._id},
-    $addToSet: {followers: user._id}
+    $addToSet: {followers: user._id},
+    $push: {logs: {logType: "join"}}
   })
 }
 
@@ -134,15 +135,29 @@ async function rejectSubgreddiitJoin(subgreddiit, user) {
 async function removeFollower(subgreddiit, user) {
   return Subgreddiit.updateOne({_id: subgreddiit._id}, {
     $pull: {followers: user._id},
-    $addToSet: {exFollowers: user._id}
+    $addToSet: {exFollowers: user._id},
+    $push: {logs: {logType: "leave"}}
   })
 }
 
 async function blockFollower(subgreddiit, user) {
   return Subgreddiit.updateOne({_id: subgreddiit._id}, {
     $pull: {followers: user._id},
-    $addToSet: {blockedUsers: user._id}
+    $addToSet: {blockedUsers: user._id},
+    $push: {logs: {logType: "block"}}
   })
+}
+
+async function addDeleteLog(subgreddiit) {
+  return Subgreddiit.updateOne({_id: subgreddiit._id}, {$push: {logs: {logType: "deletePost"}}})
+}
+
+async function addVisitLog(subgreddiit) {
+  return Subgreddiit.updateOne({_id: subgreddiit._id}, {$push: {logs: {logType: "visit"}}})
+}
+
+async function addReportLog(subgreddiit) {
+  return Subgreddiit.updateOne({_id: subgreddiit._id}, {$push: {logs: {logType: "report"}}})
 }
 
 module.exports = {
@@ -163,5 +178,8 @@ module.exports = {
   getJoinedSubgreddiits,
   getNotJoinedSubgreddiits,
   removeFollower,
-  blockFollower
+  blockFollower,
+  addDeleteLog,
+  addVisitLog,
+  addReportLog
 }

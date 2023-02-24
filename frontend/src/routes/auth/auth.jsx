@@ -1,10 +1,10 @@
 import './auth.css'
+import greddiitLogo from "../../assets/greddiit.svg"
 
 import {Card, Text, Input, Spacer, Button, Badge} from "@nextui-org/react";
 
 import {useContext, useState, useRef, useEffect} from "react";
 import useValidationForm from "../../hooks/validationForm.js";
-import logoName from '../../assets/logoName.svg'
 import {createSearchParams, useLoaderData, useNavigate} from "react-router-dom";
 import {JWTContext} from "../../contexts/jwtContext.js";
 import {
@@ -250,7 +250,7 @@ export default function Auth() {
     <Card>
       <Card.Header id="auth-header">
         <div id="auth-logo-wrapper">
-          <img id="auth-logo" src={logoName} alt="logo"/>
+          <img id="auth-logo" src={greddiitLogo} alt="logo"/>
         </div>
       </Card.Header>
       <Card.Body id="auth-body">

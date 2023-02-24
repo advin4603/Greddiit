@@ -1,6 +1,6 @@
-import {Badge, Card, Grid, Input, Spacer, Text, Textarea, Button, styled} from "@nextui-org/react";
+import {Badge, Card, Grid, Input, Spacer, Text, Textarea, Button, styled, Tooltip} from "@nextui-org/react";
 import useValidationForm from "../../hooks/validationForm.js";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {requiredValidator, oneWordValidator, oneWordLowerCaseValidator} from "../../util/validation.js";
 import EditIcon from "../../icons/editIcon.jsx";
 import AddIcon from "../../icons/addIcon.jsx";
@@ -38,6 +38,25 @@ export default function Settings({cardStyle, subgreddiit}) {
   const [submittingTag, setSubmittingTag] = useState(false);
   const [submittingBannedKeyword, setSubmittingBannedKeyword] = useState(false);
 
+  const handleImageUpload = async (e) => {
+    const files = e.target.files;
+    if (files.length === 0) {
+      return
+    }
+    const file = files[0]
+    const formData = new FormData();
+    formData.append("image", file)
+    try {
+      const response = await backend.post(`subgreddiits/${subgreddiit.title}/profilePic`, formData)
+      if (response.status === 200)
+        revalidator.revalidate()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const inputRef = useRef(null);
+
 
   return (<>
       <Card style={cardStyle}>
@@ -47,12 +66,19 @@ export default function Settings({cardStyle, subgreddiit}) {
           </Text>
         </Card.Header>
         <Card.Body>
+          <input multiple={false} accept="image/*" type="file" ref={inputRef} style={{display: "none"}}
+                 onChange={handleImageUpload}/>
+          <Button onPress={() => {
+            inputRef.current.click()
+          }}>Change Profile Picture</Button>
+          <Spacer/>
           {
             error ?
               <>
                 <Badge enableShadow disableOutline color="error">
                   {error}
                 </Badge>
+                <Spacer/>
               </>
               :
               null
@@ -142,21 +168,23 @@ export default function Settings({cardStyle, subgreddiit}) {
             {subgreddiit.bannedKeywords.map((el) => {
               return (
                 <Grid key={el}>
-                  <StyledButton
-                    aria-label="remove banned keyword"
-                    onClick={async () => {
-                      try {
-                        const response = await backend.delete(`subgreddiits/${subgreddiit.title}/bannedKeywords`, {data: {bannedKeyword: el}})
-                        if (response.status === 200) {
-                          revalidator.revalidate();
+                  <Tooltip content="Remove Keyword">
+                    <StyledButton
+                      aria-label="remove banned keyword"
+                      onClick={async () => {
+                        try {
+                          const response = await backend.delete(`subgreddiits/${subgreddiit.title}/bannedKeywords`, {data: {bannedKeyword: el}})
+                          if (response.status === 200) {
+                            revalidator.revalidate();
+                          }
+                        } catch (e) {
+                          console.error(e)
                         }
-                      } catch (e) {
-                        console.error(e)
-                      }
-                    }}
-                  >
-                    <Badge variant="bordered" color="error">{el}</Badge>
-                  </StyledButton>
+                      }}
+                    >
+                      <Badge variant="bordered" color="error">{el}</Badge>
+                    </StyledButton>
+                  </Tooltip>
                 </Grid>
               );
             })}
@@ -196,21 +224,23 @@ export default function Settings({cardStyle, subgreddiit}) {
             {subgreddiit.tags.map((el) => {
               return (
                 <Grid key={el}>
-                  <StyledButton
-                    aria-label="remove tag"
-                    onClick={async () => {
-                      try {
-                        const response = await backend.delete(`subgreddiits/${subgreddiit.title}/tags`, {data: {tag: el}})
-                        if (response.status === 200) {
-                          revalidator.revalidate();
+                  <Tooltip content="Remove Tag">
+                    <StyledButton
+                      aria-label="remove tag"
+                      onClick={async () => {
+                        try {
+                          const response = await backend.delete(`subgreddiits/${subgreddiit.title}/tags`, {data: {tag: el}})
+                          if (response.status === 200) {
+                            revalidator.revalidate();
+                          }
+                        } catch (e) {
+                          console.error(e)
                         }
-                      } catch (e) {
-                        console.error(e)
-                      }
-                    }}
-                  >
-                    <Badge variant="bordered" color="primary">{el}</Badge>
-                  </StyledButton>
+                      }}
+                    >
+                      <Badge variant="bordered" color="primary">{el}</Badge>
+                    </StyledButton>
+                  </Tooltip>
                 </Grid>);
             })}
           </Grid.Container>

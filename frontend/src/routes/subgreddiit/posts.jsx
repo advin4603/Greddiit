@@ -8,6 +8,7 @@ import {
   Spacer,
   Text,
   Textarea,
+  Popover,
   useModal, User, Grid
 } from "@nextui-org/react";
 import UpvoteIcon from "../../icons/upvoteIcon.jsx";
@@ -32,7 +33,7 @@ import "./posts.css"
 
 dayjs.extend(relativeTime)
 
-function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
+function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle, bannedKeywords}) {
   const {data, validate, bindings: inputBindings, setData, setAllValidate} = useValidationForm({
     title: "",
     post: ""
@@ -42,6 +43,7 @@ function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
   useEffect(() => {
     setData.title("")
     setData.post("")
+    setError("")
     setAllValidate(false)
   }, [bindings])
 
@@ -50,6 +52,14 @@ function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
 
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  let hasBanned = false;
+  if (bannedKeywords !== undefined)
+    for (const bannedKeyword of bannedKeywords) {
+      let regex = new RegExp(bannedKeyword, "i")
+      if (regex.test(data.title) || regex.test(data.post))
+        hasBanned = true;
+    }
 
   return <Modal blur scroll width="min(80%, 700px)" closeButton {...bindings} aria-labelledby="create new subgreddiit"
                 aria-describedby="create new subgreddiit"
@@ -89,31 +99,85 @@ function CreateNewPostModal({bindings, closeModal, refetch, subgreddiitTitle}) {
     </Modal.Body>
 
     <Modal.Footer>
-      <Button
-        disabled={titleError.error || postError.error || submitting}
-        onPress={async () => {
-          try {
-            setSubmitting(true);
-            const response = await backend.post("posts", {...data, postedIn: subgreddiitTitle})
-            if (response.status === 200) {
-              closeModal();
-              refetch();
-              setSubmitting(false)
+      {
+        hasBanned ?
+          <Popover>
+            <Popover.Trigger>
+              <Button disabled={titleError.error || postError.error || submitting}>Create</Button>
+            </Popover.Trigger>
+            <Popover.Content>
+              <div style={{padding: "1rem"}}>
+                <Grid.Container justify="center">
+                  <Grid>
+                    <Text b>Confirm</Text>
+                  </Grid>
+                </Grid.Container>
+                <Grid.Container justify="center">
+                  <Grid>
+                    <Text style={{textAlign: "center"}}>Your post contains words banned by the moderator. These words
+                      will be censored</Text>
+                  </Grid>
+                </Grid.Container>
+                <Grid.Container justify="center">
+                  <Grid>
+                    <Button
+                      disabled={titleError.error || postError.error || submitting}
+                      onPress={async () => {
+                        try {
+                          setSubmitting(true);
+                          const response = await backend.post("posts", {...data, postedIn: subgreddiitTitle})
+                          if (response.status === 200) {
+                            closeModal();
+                            refetch();
+                            setSubmitting(false)
+
+                          }
+                        } catch (e) {
+                          if ((e.response?.status === 400 || e.response?.status === 403) && e.response?.data.errors) {
+                            setError(e.response.data.errors[0])
+                            setSubmitting(false)
+                          } else {
+                            setError("Something went wrong")
+                            setSubmitting(false)
+                          }
+                        }
+                      }
+                      }
+                    >
+                      Create
+                    </Button>
+                  </Grid>
+                </Grid.Container>
+              </div>
+            </Popover.Content>
+          </Popover> :
+          <Button
+            disabled={titleError.error || postError.error || submitting}
+            onPress={async () => {
+              try {
+                setSubmitting(true);
+                const response = await backend.post("posts", {...data, postedIn: subgreddiitTitle})
+                if (response.status === 200) {
+                  closeModal();
+                  refetch();
+                  setSubmitting(false)
+                }
+              } catch (e) {
+                if ((e.response?.status === 400 || e.response?.status === 403) && e.response?.data.errors) {
+                  setError(e.response.data.errors[0])
+                  setSubmitting(false)
+                } else {
+                  setError("Something went wrong")
+                  setSubmitting(false)
+                }
+              }
             }
-          } catch (e) {
-            if ((e.response?.status === 400 || e.response?.status === 403) && e.response?.data.errors) {
-              setError(e.response.data.errors[0])
-              setSubmitting(false)
-            } else {
-              setError("Something went wrong")
-              setSubmitting(false)
             }
-          }
-        }
-        }
-      >
-        Create
-      </Button>
+          >
+            Create
+          </Button>
+
+      }
     </Modal.Footer>
   </Modal>
 }
@@ -207,7 +271,7 @@ function Comment({post, comment, username, refetchComments}) {
           <User
             style={{paddingLeft: 0}}
             size="md"
-            src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+            src={`${backend.defaults.baseURL}users/${comment.commentedBy.username}/profilePic`}
             bordered
           >
             {isBlocked ?
@@ -228,7 +292,7 @@ function Comment({post, comment, username, refetchComments}) {
           </Text>
           <Text b style={{textAlign: "right"}} size="$xs">{dayjs(comment.createdAt).fromNow()}</Text>
         </Card.Body>
-        <Card.Divider />
+        <Card.Divider/>
         <Card.Footer>
           <Grid.Container gap={1} alignItems="center">
             <Grid>
@@ -370,10 +434,11 @@ function Comments({post, modalBindings, username}) {
       <Spacer/>
       {
         comments.map(comment => (
-          <Comment username={username} post={post} key={comment._id} comment={comment} refetchComments={commentsRefetch}/>
+          <Comment username={username} post={post} key={comment._id} comment={comment}
+                   refetchComments={commentsRefetch}/>
         ))
       }
-      <Spacer />
+      <Spacer/>
     </>
   );
 }
@@ -416,7 +481,9 @@ function FullPostModal({
             <User
               style={{paddingLeft: 0}}
               size="lg"
-              src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+              src={showSubgreddiit?
+                `${backend.defaults.baseURL}subgreddiits/${post.postedIn.title}/profilePic`:
+                `${backend.defaults.baseURL}users/${post.postedBy.username}/profilePic`}
               bordered
             >
 
@@ -567,7 +634,7 @@ function FullPostModal({
             </Grid.Container>
           </Grid>
           {
-            !showSubgreddiit?
+            !showSubgreddiit ?
               <Grid>
                 <Button
                   disabled={!savedPostsFetched || saving}
@@ -598,7 +665,7 @@ function FullPostModal({
                     setSaving(false)
                   }}
                 />
-              </Grid>:
+              </Grid> :
               null
           }
 
@@ -687,7 +754,9 @@ export function PostCard({
               <User
                 style={{paddingLeft: 0}}
                 size="lg"
-                src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+                src={showSubgreddiit?
+                  `${backend.defaults.baseURL}subgreddiits/${post.postedIn.title}/profilePic`:
+                  `${backend.defaults.baseURL}users/${post.postedBy.username}/profilePic`}
                 bordered
               >
 
@@ -904,7 +973,7 @@ export function PostCard({
   );
 }
 
-export default function Posts({cardStyle, subgreddiitTitle}) {
+export default function Posts({cardStyle, subgreddiitTitle, bannedKeywords}) {
   const {username} = useContext(JWTContext);
   const [posts, setPosts] = useState([]);
 
@@ -941,6 +1010,7 @@ export default function Posts({cardStyle, subgreddiitTitle}) {
 
   return (<>
       <CreateNewPostModal
+        bannedKeywords={bannedKeywords}
         bindings={createNewBindings}
         closeModal={() => {
           setCreateNewVisible(false)
@@ -953,7 +1023,7 @@ export default function Posts({cardStyle, subgreddiitTitle}) {
       }}>
         <Card.Body>
           <div id="create-new-row">
-            <Text h3>Create A New Post</Text><AddIcon/>
+            <Text h3 style={{marginBottom: "0"}}>Create A New Post</Text><AddIcon/>
           </div>
         </Card.Body>
       </Card>

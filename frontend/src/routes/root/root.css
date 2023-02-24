@@ -1,0 +1,7 @@
+#outlet {
+    transition: filter 200ms;
+}
+
+.page-loading {
+    filter: blur(1.5rem);
+}

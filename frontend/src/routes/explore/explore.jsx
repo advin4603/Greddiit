@@ -9,7 +9,9 @@ import {
   styled,
   Dropdown,
   Collapse,
-  Link as LinkDisplay, User, Loading
+  Link as LinkDisplay, User, Loading,
+  Tooltip,
+  Popover
 } from "@nextui-org/react";
 import {useMemo, useState, useContext} from "react";
 import AddIcon from "../../icons/addIcon.jsx";
@@ -266,15 +268,17 @@ export default function Explore() {
             {tags.map((el) => {
               return (
                 <Grid key={el}>
-                  <StyledButton
-                    aria-label="remove tag"
-                    onClick={() => {
-                      removeTag(el)
-                      setData.tag("")
-                    }}
-                  >
-                    <Badge variant="bordered" color="primary">{el}</Badge>
-                  </StyledButton>
+                  <Tooltip content="Remove Tag">
+                    <StyledButton
+                      aria-label="remove tag"
+                      onClick={() => {
+                        removeTag(el)
+                        setData.tag("")
+                      }}
+                    >
+                      <Badge variant="bordered" color="primary">{el}</Badge>
+                    </StyledButton>
+                  </Tooltip>
                 </Grid>);
             })}
           </Grid.Container>
@@ -330,7 +334,7 @@ export default function Explore() {
                     <User
                       style={{paddingLeft: 0}}
                       size="lg"
-                      src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+                      src={`${backend.defaults.baseURL}subgreddiits/${subgreddiit.title}/profilePic`}
                       bordered
                     >
                       <LinkDisplay block color="primary" as={"div"}>
@@ -408,7 +412,7 @@ export default function Explore() {
                     <User
                       style={{paddingLeft: 0}}
                       size="lg"
-                      src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+                      src={`${backend.defaults.baseURL}subgreddiits/${subgreddiit.title}/profilePic`}
                       bordered
                     >
                       <LinkDisplay block color="primary" as={"div"}>
@@ -423,13 +427,24 @@ export default function Explore() {
                   <Grid>
                     {
                       subgreddiit.blocked || subgreddiit.exFollower ?
-                        <Button
-                          color="error"
-                          css={{minWidth: "fit-content"}}
-                          light
-                        >
-                          <BlockIcon size={30}/>
-                        </Button>
+                        <Popover>
+                          <Popover.Trigger>
+                            <Button
+                              color="error"
+                              css={{minWidth: "fit-content"}}
+                              light
+                            >
+                              <BlockIcon size={30}/>
+                            </Button>
+                          </Popover.Trigger>
+                          <Popover.Content>
+                            <div style={{padding: "1rem"}}>
+                              <Text b>
+                                {subgreddiit.blocked ? "You have been blocked from this subgreddiit" : "You have left his subgreddiit and can't join again"}
+                              </Text>
+                            </div>
+                          </Popover.Content>
+                        </Popover>
                         :
                         <JoinButton refetch={refetch} subgreddiit={subgreddiit}/>
                     }

@@ -1,7 +1,7 @@
 const {Router, request} = require("express")
 const {findPostID, deletePost} = require("../controllers/postController");
 const {findUser} = require("../controllers/userController");
-const {findSubgreddiit, blockFollower} = require("../controllers/subgreddiitController");
+const {findSubgreddiit, blockFollower, addDeleteLog, addReportLog} = require("../controllers/subgreddiitController");
 const {createReport, getReportID, ignoreReport, blockReported} = require("../controllers/reportController");
 
 const reportsRouter = Router()
@@ -46,7 +46,7 @@ reportsRouter.post("/:id/deletePost", async (request, response) => {
   if (subgreddiit.moderator.username !== request.username)
     return response.sendStatus(401)
 
-  await deletePost(post);
+  await Promise.all([deletePost(post), addDeleteLog(subgreddiit)]);
   return response.sendStatus(200)
 })
 
@@ -64,7 +64,12 @@ reportsRouter.post("", async (request, response, next) => {
     return response.sendStatus(400)
 
   try {
-    await createReport(user, post, request.body.concern)
+    await Promise.all(
+      [
+        createReport(user, post, request.body.concern),
+        addReportLog(subgreddiit)
+      ]
+    )
     return response.sendStatus(200)
   } catch (e) {
     next(e)

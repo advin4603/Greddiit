@@ -52,7 +52,7 @@ function Report({report, subgreddiit, cardStyle, refetch}) {
         <User
           style={{paddingLeft: 0}}
           size="lg"
-          src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+          src={`${backend.defaults.baseURL}users/${report.reporter.username}/profilePic`}
           bordered
         >
 
@@ -76,7 +76,7 @@ function Report({report, subgreddiit, cardStyle, refetch}) {
             <User
               style={{paddingLeft: 0}}
               size="lg"
-              src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+              src={`${backend.defaults.baseURL}users/${reported?.username}/profilePic`}
               bordered
             >
               <LinkDisplay block color="primary" as={"div"}>

@@ -15,7 +15,7 @@ function FollowRequest({followRequester, subgreddiit, isRejected = false}) {
       <Grid>
         <UserInfo
           size="lg"
-          src={"https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif"}
+          src={`${backend.defaults.baseURL}users/${followRequester.username}/profilePic`}
           bordered
         >
           <LinkDisplay block color="primary" as={"div"}>

@@ -1,4 +1,4 @@
-const {Router} = require("express");
+const {Router, request} = require("express");
 const {
   findUser,
   updateUser,
@@ -9,8 +9,29 @@ const {
 } = require("../controllers/userController")
 const {findSubgreddiit} = require("../controllers/subgreddiitController");
 const {censor, findPostID} = require("../controllers/postController");
-
+const fs = require("fs");
+const multer = require('multer');
+const path = require('path');
 const usersRouter = Router()
+
+const userProfilePicStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./media/userProfilePics/")
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${req.username}${path.extname(file.originalname)}`)
+  }
+})
+
+const upload = multer({storage: userProfilePicStorage})
+
+
+usersRouter.post("/profilePic", upload.single("image"), async (request, response) => {
+  if (!request.file || !request.file.mimetype.startsWith("image/"))
+    return response.sendStatus(400)
+
+  response.sendStatus(200)
+})
 
 usersRouter.get("/:username", async (request, response) => {
   const user = await findUser({username: request.params.username})
@@ -19,6 +40,7 @@ usersRouter.get("/:username", async (request, response) => {
 
   response.send(user)
 })
+
 
 usersRouter.get("/:username/savedPosts", async (request, response) => {
   if (request.params.username !== request.username)

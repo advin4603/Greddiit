@@ -121,7 +121,8 @@ function SubgreddiitCard({subgreddiit, refetch}) {
             <User
               style={{paddingLeft: 0}}
               size="lg"
-              src="https://static.wikia.nocookie.net/undertale/images/8/81/Waterfall_location_music_box.png"
+              src={`${backend.defaults.baseURL}subgreddiits/${subgreddiit.title}/profilePic`}
+
               bordered
             >
               <LinkDisplay block color="primary" as={"div"}>
@@ -229,7 +230,7 @@ export default function MySubgreddiits() {
     }}>
       <Card.Body>
         <div id="create-new-row">
-          <Text h3>Create A New Subgreddiit</Text><AddIcon/>
+          <Text h3 style={{marginBottom: "0"}}>Create A New Subgreddiit</Text><AddIcon/>
         </div>
       </Card.Body>
     </Card>

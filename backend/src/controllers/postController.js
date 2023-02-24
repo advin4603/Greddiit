@@ -50,8 +50,8 @@ async function removeVote(post, user) {
 
 function censor(text, bannedKeywords) {
   for (const bannedKeyword of bannedKeywords) {
-    let regex = new RegExp(bannedKeyword, "i")
-    text = text.replace(regex, "*".repeat(bannedKeyword.length))
+    let regex = new RegExp(bannedKeyword, "ig")
+    text = text.replaceAll(regex, "*".repeat(bannedKeyword.length))
   }
   return text
 }

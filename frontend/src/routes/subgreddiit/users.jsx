@@ -1,12 +1,13 @@
 import {Card, Link as LinkDisplay, Spacer, Text, User as UserInfo, Grid} from "@nextui-org/react";
 import {Link} from "react-router-dom";
+import backend from "../../backend/backend.js";
 
 function User({user, cardStyle, moderator}) {
   return (<div>
 
       <UserInfo
         size="lg"
-        src={"https://static.wikia.nocookie.net/undertale/images/5/50/Mad_Dummy_battle.gif"}
+        src={`${backend.defaults.baseURL}users/${user.username}/profilePic`}
         bordered
         color={moderator ? "success" : "primary"}
       >

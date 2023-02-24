@@ -13,6 +13,7 @@ class App {
   }
 
   middlewares() {
+    this.server.use("/static", express.static("media"))
     this.server.use(cors({origin: "*"}))
     this.server.use(express.json());
     this.server.use(morgan("tiny"))

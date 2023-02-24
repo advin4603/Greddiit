@@ -11,14 +11,45 @@ const {
   updateSubgreddiit,
   requestSubgreddiitJoin,
   approveSubgreddiitJoin, rejectSubgreddiitJoin, createSubgreddiitOutsiderView, createSubgreddiitFollowerView,
-  getJoinedSubgreddiits, getNotJoinedSubgreddiits, removeFollower
+  getJoinedSubgreddiits, getNotJoinedSubgreddiits, removeFollower, addVisitLog
 } = require("../controllers/subgreddiitController")
 const {findUser} = require("../controllers/userController")
 const {getPostsInSubgreddiit} = require("../controllers/postController");
 const {getReportsInSubgreddiit} = require("../controllers/reportController");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 const subgreddiitsRouter = Router()
 
+const subgreddiitProfilePicStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const subgreddiitDir = "./media/subgreddiitProfilePics/"
+    fs.mkdirSync(subgreddiitDir, {recursive: true})
+    cb(null, subgreddiitDir)
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${req.params.title}${path.extname(file.originalname)}`)
+  }
+})
+
+const upload = multer({storage: subgreddiitProfilePicStorage})
+
+subgreddiitsRouter.post("/:title/profilePic", async (request, response, next) => {
+  const subgreddiit = await findSubgreddiit({title: request.params.title})
+  if (subgreddiit === null)
+    return response.sendStatus(404)
+  if (subgreddiit.moderator.username !== request.username)
+    return response.sendStatus(401)
+
+  request.subgreddiit = subgreddiit.title;
+  next()
+}, upload.single("image"), async (request, response) => {
+  if (!request.file || !request.file.mimetype.startsWith("image/"))
+    return response.sendStatus(400)
+
+  response.sendStatus(200)
+})
 
 subgreddiitsRouter.get("/moderated", async (request, response) => {
   const user = await findUser({username: request.username});
@@ -185,6 +216,7 @@ subgreddiitsRouter.get("/:title", async (request, response) => {
       createSubgreddiitFollowerView(subgreddiit)
     )
   response.send(subgreddiit)
+  await addVisitLog(subgreddiit)
 })
 
 

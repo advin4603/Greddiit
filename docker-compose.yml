@@ -1,0 +1,27 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - 4173:4173
+    command: preview
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - 8080:8080
+    command: prod
+    depends_on:
+      - mongodb
+    volumes:
+      - media_container:/backend/media
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:
+  media_container:
