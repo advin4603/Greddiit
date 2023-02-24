@@ -4,7 +4,13 @@ const {Schema} = mongoose;
 const rejectionExpiryDays = 7;
 
 const subgreddiitSchema = new Schema({
-  title: {type: String, required: [true, "Title is required"], unique: true, minLength: [1, "Title is required"]},
+  title: {
+    type: String,
+    required: [true, "Title is required"],
+    match: [/^[\w\s-]+$/, "Subgreddiit title can only contain letters, numbers, hyphens and spaces"],
+    unique: true,
+    minLength: [1, "Title is required"]
+  },
   description: {type: String, required: [true, "Description is required"], minLength: [1, "Description is required"]},
   tags: [{
     type: String,

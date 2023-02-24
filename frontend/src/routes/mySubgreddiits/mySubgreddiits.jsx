@@ -152,7 +152,7 @@ function SubgreddiitCard({subgreddiit, refetch}) {
                 }
               }}
             >
-                <CancelIcon size={30} fill="currentColor"/>
+              <CancelIcon size={30} fill="currentColor"/>
             </Button>
           </Grid>
         </Grid.Container>
@@ -203,13 +203,15 @@ function SubgreddiitList() {
 
 
   return <>
-    {subgreddiits.map((el) => {
-      return (<div key={el.title}>
-          <Spacer/>
-          <SubgreddiitCard refetch={refetch} subgreddiit={el}/>
-        </div>
-      );
-    })}
+    {subgreddiits.length === 0 ?
+      <><Spacer /><Card style={cardStyle}><Card.Body><Text h3>No Created Subgreddiits</Text></Card.Body></Card> </> :
+      subgreddiits.map((el) => {
+        return (<div key={el.title}>
+            <Spacer/>
+            <SubgreddiitCard refetch={refetch} subgreddiit={el}/>
+          </div>
+        );
+      })}
   </>
 }
 

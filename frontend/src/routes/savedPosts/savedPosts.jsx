@@ -34,7 +34,7 @@ function SavedPost({id}) {
       if (response.status === 200)
         setPost(response.data)
     } catch (e) {
-      if (e.response?.status !== 401)
+      if (e.response?.status !== 401 && e.response?.status !== 404)
         console.error(e)
     }
   }, [])
@@ -53,7 +53,7 @@ function SavedPost({id}) {
         savedPostsRefetch={revalidator.revalidate}
         showSubgreddiit
       />
-      <Spacer />
+      <Spacer/>
     </>
   )
 }
@@ -73,9 +73,11 @@ export default function SavedPosts() {
       </Card>
       <Spacer/>
       {
-        savedPostIDs.map(id =>
-          <SavedPost id={id} key={id}/>
-        )
+        savedPostIDs.length === 0 ?
+          <Card style={cardStyle}><Card.Body><Text h3>No Saved Posts</Text></Card.Body></Card> :
+          savedPostIDs.map(id =>
+            <SavedPost id={id} key={id}/>
+          )
       }
     </>
   );

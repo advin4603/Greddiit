@@ -16,6 +16,11 @@ export const emailValidator = (value) => {
 
 export const usernameValidator = (value) => {
   let usernameError = {error: false, helperText: ""}
+  const usernameRegex = /^[\w\s-]+$/
+  if (!usernameRegex.test(value)) usernameError = {
+    error: true,
+    helperText: "Username can only contain letters, numbers, hyphens and spaces"
+  }
   if (value.length === 0) usernameError = {error: true, helperText: "Username is required"}
 
   return usernameError

@@ -2,7 +2,13 @@ const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
 const userSchema = new Schema({
-  username: {type: String, required: [true, "Username is required"], unique: true, minLength: [1, "Username is required"]},
+  username: {
+    type: String,
+    required: [true, "Username is required"],
+    unique: true,
+    match: [/^[\w\s-]+$/, "Username can only contain letters, numbers, hyphens and spaces"],
+    minLength: [1, "Username is required"]
+  },
   firstName: {type: String, required: [true, "First Name is required"], minLength: [1, "First Name is required"]},
   lastName: {type: String, required: [true, "Last Name is required"], minLength: [1, "Last Name is required"]},
   email: {
