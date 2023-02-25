@@ -12,9 +12,9 @@ const path = require('path');
 const routes = Router();
 routes.get("/users/:username/profilePic", async (request, response) => {
   if (!fs.existsSync("./media/userProfilePics/"))
-    return response.redirect("/static/defaultUser.gif")
+    return response.redirect("/api/static/defaultUser.gif")
 
-  const files = fs.readdirSync("/backend/media/userProfilePics/")
+  const files = fs.readdirSync("./media/userProfilePics/")
   let matchingFile;
   const fileExists = files.some(file => {
     const nameWithoutExtension = path.parse(file).name;
@@ -25,14 +25,14 @@ routes.get("/users/:username/profilePic", async (request, response) => {
   });
 
   if (fileExists)
-    return response.redirect(`/static/userProfilePics/${matchingFile}`)
+    return response.redirect(`/api/static/userProfilePics/${matchingFile}`)
   else
-    return response.redirect("/static/defaultUser.gif")
+    return response.redirect("/api/static/defaultUser.gif")
 
 })
 routes.get("/subgreddiits/:title/profilePic", async (request, response) => {
-  if (!fs.existsSync(`media/subgreddiitProfilePics/`))
-    return response.redirect("/static/defaultSubgreddiit.gif")
+  if (!fs.existsSync(`./media/subgreddiitProfilePics/`))
+    return response.redirect("/api/static/defaultSubgreddiit.gif")
 
   const files = fs.readdirSync("./media/subgreddiitProfilePics/")
   let matchingFile;
@@ -45,9 +45,9 @@ routes.get("/subgreddiits/:title/profilePic", async (request, response) => {
   });
 
   if (fileExists)
-    return response.redirect(`/static/subgreddiitProfilePics/${matchingFile}`)
+    return response.redirect(`/api/static/subgreddiitProfilePics/${matchingFile}`)
   else
-    return response.redirect("/static/defaultSubgreddiit.gif")
+    return response.redirect("/api/static/defaultSubgreddiit.gif")
 })
 routes.use(authRouter)
 

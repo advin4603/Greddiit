@@ -2,16 +2,12 @@ services:
   frontend:
     build:
       context: ./frontend
-    ports:
-      - 4173:4173
     command: preview
     depends_on:
       - backend
   backend:
     build:
       context: ./backend
-    ports:
-      - 8080:8080
     command: prod
     depends_on:
       - mongodb
@@ -21,6 +17,14 @@ services:
     image: mongo:latest
     volumes:
       - mongodb_data_container:/data/db
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - 8000:80
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
   mongodb_data_container:

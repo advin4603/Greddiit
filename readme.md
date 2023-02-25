@@ -12,7 +12,7 @@ Run the following command to run the server
 docker compose up
 ```
 
-You can now access the website at [http://localhost:4173/]()
+You can now access the website at [http://localhost:8000]()
 
 ## Implementation Details
 
