@@ -1,5 +1,5 @@
 # Greddiit 
-A Full Stack Reddit Clone built using the MERN Stack and the NextUI Ui Library.
+A fully functional Full Stack Reddit Clone built using the MERN Stack and the NextUI UI Library.Create posts, Comment, upvote downvote Posts, Follow users, Moderate your "Subgreddiits" and view realtime stats.
 
 ## Running the Web Server
 
